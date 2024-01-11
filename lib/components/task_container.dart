@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import '../models/task_model.dart';
 
 class TaskContainer extends StatelessWidget {
+  final Key dismissibleKey;
   final int index;
   final TaskModel item;
   final void Function()? checkedOnPressed;
   final void Function()? importantOnPressed;
   final void Function()? onLongPressed;
+  final void Function(DismissDirection)? onDismissed;
 
   const TaskContainer({
       super.key,
@@ -15,14 +17,21 @@ class TaskContainer extends StatelessWidget {
       required this.item,
       this.checkedOnPressed,
       this.importantOnPressed,
-      this.onLongPressed
+      this.onLongPressed,
+      required this.dismissibleKey,
+      this.onDismissed
     }
   );
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 10, top: index == 0 ? 10 : 0),
+    return Dismissible(
+      key: dismissibleKey,
+      background: Container(
+        color: Colors.red,
+        child: const Icon(Icons.delete, color: Colors.white,),
+      ),
+      onDismissed: onDismissed,
       child: Material(
         clipBehavior: Clip.hardEdge,
         color: item.isChecked ? Colors.blue[50] : Colors.white,

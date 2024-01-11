@@ -19,37 +19,9 @@ late DrawerOptions selectedOption;
 late TextEditingController _controller;
 late GlobalKey formKey;
 
-List<TaskModel> tasks = [
-  TaskModel(
-      task: 'Go To work',
-      isChecked: false,
-      isImportant: false,
-      category: 'task'),
-  TaskModel(
-      task: 'Go To work',
-      isChecked: false,
-      isImportant: false,
-      category: 'task'),
-  TaskModel(
-      task: 'Go To work',
-      isChecked: false,
-      isImportant: false,
-      category: 'task'),
-  TaskModel(
-      task: 'Go To work',
-      isChecked: false,
-      isImportant: false,
-      category: 'task'),
-  TaskModel(
-      task: 'Go To work',
-      isChecked: false,
-      isImportant: false,
-      category: 'task'),
-];
-List<TaskModel> completedTasks = [
-  TaskModel(
-      task: 'Go To work', isChecked: true, isImportant: true, category: 'task'),
-];
+List<TaskModel> tasks = [];
+List<TaskModel> completedTasks = [];
+
 List<DrawerOptions> options = [
   DrawerOptions.myDay,
   DrawerOptions.tasks,
@@ -68,7 +40,6 @@ class _HomeState extends State<Home> {
     if (kDebugMode) {
       print('Total items: ${boxTasks.length}');
     }
-
   }
 
   @override
@@ -125,29 +96,30 @@ class _HomeState extends State<Home> {
                       shrinkWrap: true,
                       itemCount: boxTasks.length,
                       itemBuilder: (context, index) {
-
                         // var item = tasks[index];
                         TaskModel task = boxTasks.getAt(index);
 
-                        return Dismissible(
-                          key: ValueKey<int>(index),
-                          background: Container(
-                            color: Colors.red,
-                            child: const Icon(Icons.delete, color: Colors.white,),
-                          ),
-                          onDismissed: (direction){
-                            setState(() => removeTask(index));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Task Deleted'),
-                              duration: Duration(seconds: 1),)
-                            );
-                          },
-                          child: TaskContainer(
-                            item: task,
-                            index: index,
-                            checkedOnPressed: () => setState(() => updateState(index, true)),
-                            importantOnPressed: () => setState(() => updateState(index, false)),
-                          ),
+                        return Column(
+                          children: [
+                            TaskContainer(
+                              dismissibleKey: ValueKey(boxTasks.keyAt(index)),
+                              item: task,
+                              index: index,
+                              checkedOnPressed: () =>
+                                  setState(() => updateState(index, true)),
+                              importantOnPressed: () =>
+                                  setState(() => updateState(index, false)),
+                              onDismissed: (direction) {
+                                setState(() => removeTask(index));
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text('Task Deleted'),
+                                  duration: Duration(seconds: 1),
+                                ));
+                              },
+                            ),
+                            const SizedBox(height: 5,)
+                          ],
                         );
                       },
                     ),
@@ -165,7 +137,11 @@ class _HomeState extends State<Home> {
                             borderRadius: BorderRadius.circular(10)),
                         children: completedTasks.map((e) {
                           int index = tasks.indexOf(e);
-                          return TaskContainer(index: index, item: e);
+                          return TaskContainer(
+                            index: index,
+                            item: e,
+                            dismissibleKey: ValueKey(boxTasks.keyAt(index)),
+                          );
                         }).toList(),
                       )
                   ],
@@ -187,7 +163,8 @@ class _HomeState extends State<Home> {
                           children: [
                             Flexible(
                               child: TextFormField(
-                                textCapitalization: TextCapitalization.sentences,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
                                 decoration: const InputDecoration(
                                     prefixIcon: Icon(Icons.circle_outlined),
                                     hintText: 'Add a task',
@@ -209,18 +186,16 @@ class _HomeState extends State<Home> {
                               onPressed: _controller.text.isEmpty
                                   ? null
                                   : () {
-                                     setState(() {
-                                       addTask(
-                                           '${boxTasks.length}',
-                                           TaskModel(
-                                               task: _controller.text,
-                                               isChecked: false,
-                                               isImportant: false,
-                                               category: determineCategory()
-                                           )
-                                       );
-                                     });
-                                     _controller.clear();
+                                      setState(() {
+                                        addTask(
+                                            '${boxTasks.length}',
+                                            TaskModel(
+                                                task: _controller.text,
+                                                isChecked: false,
+                                                isImportant: false,
+                                                category: determineCategory()));
+                                      });
+                                      _controller.clear();
                                     },
                               icon: const Icon(
                                 Icons.arrow_upward,
@@ -230,23 +205,24 @@ class _HomeState extends State<Home> {
                           ],
                         ),
                       ),
-                      if(_controller.text.isNotEmpty)const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          CustomButton(
-                            text: 'Set Due Date',
-                            icon: Icon(Icons.calendar_month),
-                          ),
-                          CustomButton(
-                            text: 'Remind me',
-                            icon: Icon(Icons.notifications),
-                          ),
-                          CustomButton(
-                            text: 'Repeat',
-                            icon: Icon(Icons.repeat),
-                          ),
-                        ],
-                      )
+                      if (_controller.text.isNotEmpty)
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            CustomButton(
+                              text: 'Set Due Date',
+                              icon: Icon(Icons.calendar_month),
+                            ),
+                            CustomButton(
+                              text: 'Remind me',
+                              icon: Icon(Icons.notifications),
+                            ),
+                            CustomButton(
+                              text: 'Repeat',
+                              icon: Icon(Icons.repeat),
+                            ),
+                          ],
+                        )
                     ],
                   ),
                 ),
@@ -334,7 +310,6 @@ class _HomeState extends State<Home> {
         return 'important';
     }
   }
-
 }
 
 enum DrawerOptions {
@@ -342,7 +317,5 @@ enum DrawerOptions {
   tasks,
   important,
 }
-enum TaskOptions {
-  delete,
-  edit
-}
+
+enum TaskOptions { delete, edit }
