@@ -4,42 +4,29 @@ import 'package:todo/models/task_model.dart';
 
 import '../screens/home.dart';
 
-String getOptionText(DrawerOptions option) {
-  switch (option) {
+Map<String, dynamic> getOptionProperties(DrawerOptions option){
+  switch (option){
     case DrawerOptions.myDay:
-      return 'My day';
+      return {
+        'title' : 'My day',
+        'iconData' : Icons.light_mode_outlined,
+        'iconColor' :  Colors.green,
+        'backgroundImage' : 'images/nature.jpg'
+      };
     case DrawerOptions.tasks:
-      return 'Tasks';
+      return {
+        'title' : 'Tasks',
+        'iconData' : Icons.task_outlined,
+        'iconColor' :  Colors.purple,
+        'backgroundImage' : 'images/purple.jpg'
+      };
     case DrawerOptions.important:
-      return 'Important';
-    default:
-      return 'Unknown';
-  }
-}
-
-IconData getOptionIcon(DrawerOptions option) {
-  switch (option) {
-    case DrawerOptions.myDay:
-      return Icons.light_mode_outlined;
-    case DrawerOptions.tasks:
-      return Icons.task_outlined;
-    case DrawerOptions.important:
-      return Icons.star_border;
-    default:
-      return Icons.error;
-  }
-}
-
-Color getOptionIconColor(DrawerOptions option) {
-  switch (option) {
-    case DrawerOptions.myDay:
-      return Colors.green;
-    case DrawerOptions.tasks:
-      return Colors.purple;
-    case DrawerOptions.important:
-      return Colors.orange;
-    default:
-      return Colors.red;
+      return {
+        'title' : 'Important',
+        'iconData' : Icons.star_border,
+        'iconColor' :  Colors.orange,
+        'backgroundImage' : 'images/orange.jpg'
+      };
   }
 }
 
