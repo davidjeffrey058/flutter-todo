@@ -51,8 +51,7 @@ class _HomeState extends State<Home> {
       child: Container(
         decoration: BoxDecoration(
             image: DecorationImage(
-                image: AssetImage(
-                    getOptionProperties(selectedOption)['backgroundImage']),
+                image: AssetImage('images/${getOptionProperties(selectedOption)['backgroundImage']}'),
                 fit: BoxFit.cover)),
         child: Scaffold(
           backgroundColor: Colors.transparent,
@@ -103,13 +102,19 @@ class _HomeState extends State<Home> {
                                     setState(() => updateState(index, true)),
                                 importantOnPressed: () =>
                                     setState(() => updateState(index, false)),
-                                onDismissed: (direction) {
-                                  setState(() => removeTask(index));
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(const SnackBar(
-                                    content: Text('Task Deleted'),
-                                    duration: Duration(seconds: 1),
-                                  ));
+                                onDismissed: (DismissDirection direction) {
+                                  if(direction == DismissDirection.startToEnd){
+
+                                  }
+                                  if(direction == DismissDirection.endToStart){
+                                    setState(() => removeTask(index));
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(const SnackBar(
+                                      content: Text('Task Deleted'),
+                                      duration: Duration(seconds: 1),
+                                    ));
+                                  }
+
                                 },
                               ),
                               const SizedBox(
@@ -184,7 +189,6 @@ class _HomeState extends State<Home> {
                                   : () {
                                       setState(() {
                                         addTask(
-                                            '${boxTasks.length}',
                                             TaskModel(
                                                 task: _controller.text,
                                                 isChecked: false,

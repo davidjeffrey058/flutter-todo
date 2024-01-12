@@ -11,32 +11,28 @@ Map<String, dynamic> getOptionProperties(DrawerOptions option){
         'title' : 'My day',
         'iconData' : Icons.light_mode_outlined,
         'iconColor' :  Colors.green,
-        'backgroundImage' : 'images/nature.jpg'
+        'backgroundImage' : 'nature.jpg'
       };
     case DrawerOptions.tasks:
       return {
         'title' : 'Tasks',
         'iconData' : Icons.task_outlined,
         'iconColor' :  Colors.purple,
-        'backgroundImage' : 'images/purple.jpg'
+        'backgroundImage' : 'purple.jpg'
       };
     case DrawerOptions.important:
       return {
         'title' : 'Important',
         'iconData' : Icons.star_border,
         'iconColor' :  Colors.orange,
-        'backgroundImage' : 'images/orange.jpg'
+        'backgroundImage' : 'orange.jpg'
       };
   }
 }
 
-void addTask(String key, TaskModel value) {
-  boxTasks.put(key, value);
-}
+void addTask(TaskModel value) => boxTasks.add(value);
 
-void removeTask(int index) {
-  boxTasks.deleteAt(index);
-}
+void removeTask(int index) => boxTasks.deleteAt(index);
 
 void updateState(int index, bool forChecked) {
   TaskModel item = boxTasks.getAt(index);

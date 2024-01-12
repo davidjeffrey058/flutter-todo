@@ -27,9 +27,15 @@ class TaskContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dismissible(
       key: dismissibleKey,
+      secondaryBackground: Flexible(
+        child: Container(
+          color: Colors.red,
+          child: const Icon(Icons.delete, color: Colors.white,),
+        ),
+      ),
       background: Container(
-        color: Colors.red,
-        child: const Icon(Icons.delete, color: Colors.white,),
+        color: Colors.grey[400],
+        child: const Icon(Icons.edit, color: Colors.white,),
       ),
       onDismissed: onDismissed,
       child: Material(
