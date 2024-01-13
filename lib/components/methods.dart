@@ -11,7 +11,7 @@ Map<String, dynamic> getOptionProperties(DrawerOptions option){
         'title' : 'My day',
         'iconData' : Icons.light_mode_outlined,
         'iconColor' :  Colors.green,
-        'backgroundImage' : 'nature.jpg'
+        'backgroundImage' : 'nature.jpg',
       };
     case DrawerOptions.tasks:
       return {
@@ -25,7 +25,7 @@ Map<String, dynamic> getOptionProperties(DrawerOptions option){
         'title' : 'Important',
         'iconData' : Icons.star_border,
         'iconColor' :  Colors.orange,
-        'backgroundImage' : 'orange.jpg'
+        'backgroundImage' : 'sunset.jpg'
       };
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
 import 'package:todo/Cubit/drawer_cubit.dart';
+import 'package:todo/Cubit/tasks_list_cubit.dart';
 import 'package:todo/components/boxes.dart';
 import 'package:todo/components/category_title.dart';
 import 'package:todo/components/drawer_option_layout.dart';
@@ -84,50 +86,54 @@ class _HomeState extends State<Home> {
                           CategoryTitle(
                             properties: getOptionProperties(value),
                           ),
-                          ListView.builder(
-                            primary: false,
-                            shrinkWrap: true,
-                            itemCount: boxTasks.length,
-                            itemBuilder: (context, index) {
-                              // var item = tasks[index];
-                              TaskModel task = boxTasks.getAt(index);
+                          BlocBuilder<TasksListCubit, Box>(
+                            builder: (context, state){
+                              return ListView.builder(
+                                primary: false,
+                                shrinkWrap: true,
+                                itemCount: boxTasks.length,
+                                itemBuilder: (context, index) {
+                                  TaskModel task = state.getAt(index);
+                                  return Column(
+                                    children: [
+                                      if (index == 0)
+                                        const SizedBox(
+                                          height: 5,
+                                        ),
+                                      TaskContainer(
+                                        dismissibleKey: ValueKey(boxTasks.keyAt(index)),
+                                        item: task,
+                                        index: index,
+                                        checkedOnPressed: () =>
+                                            setState(() => updateState(index, true)),
+                                        importantOnPressed: () =>
+                                            setState(() => updateState(index, false)),
+                                        onDismissed: (DismissDirection direction) {
+                                          if(direction == DismissDirection.startToEnd){
 
-                              return Column(
-                                children: [
-                                  if (index == 0)
-                                    const SizedBox(
-                                      height: 5,
-                                    ),
-                                  TaskContainer(
-                                    dismissibleKey: ValueKey(boxTasks.keyAt(index)),
-                                    item: task,
-                                    index: index,
-                                    checkedOnPressed: () =>
-                                        setState(() => updateState(index, true)),
-                                    importantOnPressed: () =>
-                                        setState(() => updateState(index, false)),
-                                    onDismissed: (DismissDirection direction) {
-                                      if(direction == DismissDirection.startToEnd){
+                                          }
+                                          if(direction == DismissDirection.endToStart){
+                                            setState(() => removeTask(index));
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(const SnackBar(
+                                              content: Text('Task Deleted'),
+                                              duration: Duration(seconds: 1),
+                                            ));
+                                          }
 
-                                      }
-                                      if(direction == DismissDirection.endToStart){
-                                        setState(() => removeTask(index));
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(const SnackBar(
-                                          content: Text('Task Deleted'),
-                                          duration: Duration(seconds: 1),
-                                        ));
-                                      }
-
-                                    },
-                                  ),
-                                  const SizedBox(
-                                    height: 5,
-                                  )
-                                ],
+                                        },
+                                      ),
+                                      const SizedBox(
+                                        height: 5,
+                                      )
+                                    ],
+                                  );
+                                },
                               );
                             },
                           ),
+
+                          //completedTasks section
                           if (completedTasks.isNotEmpty)
                             ExpansionTile(
                               title: Text('Completed (${completedTasks.length})'),
