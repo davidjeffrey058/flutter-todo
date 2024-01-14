@@ -12,60 +12,66 @@ Map<String, dynamic> getOptionProperties(DrawerOptions option){
         'iconData' : Icons.light_mode_outlined,
         'iconColor' :  Colors.green,
         'backgroundImage' : 'nature.jpg',
+        'emptyMessageImage' : 'empty.png',
+        'emptyMessage'  : 'Try adding a task to spice up your day'
       };
     case DrawerOptions.tasks:
       return {
         'title' : 'Tasks',
         'iconData' : Icons.task_outlined,
         'iconColor' :  Colors.purple,
-        'backgroundImage' : 'purple_sky.jpg'
+        'backgroundImage' : 'purple_sky.jpg',
+        'emptyMessageImage' : 'empty2.png',
+        'emptyMessage' : 'No task here. Add a task'
       };
     case DrawerOptions.important:
       return {
         'title' : 'Important',
         'iconData' : Icons.star_border,
         'iconColor' :  Colors.orange,
-        'backgroundImage' : 'sunset.jpg'
+        'backgroundImage' : 'sunset.jpg',
+        'emptyMessageImage' : 'empty2.png',
+        'emptyMessage' : 'Try starring some tasks to see them here'
       };
   }
 }
 
-List<Map>  myDayOrTasksOrImportantList(bool? isMyDay, Box taskBox){
-  late List<Map> items;
-
-  if(isMyDay == null){
-    items = [];
-    for(int i = 0; i < taskBox.length; i++){
-      TaskModel value = taskBox.getAt(i);
-      if(value.isImportant){
-        items.add({
-          'task': value.task,
-          'key' : taskBox.keyAt(i),
-          'category' : value.category,
-          'isImportant' : value.isImportant,
-          'isChecked' : value.isChecked
-        });
-      }
-    }
-  }else{
-    items = [];
-    String category;
-    category = isMyDay ? 'My day' : 'Tasks';
-    for(int i = 0; i < taskBox.length; i++){
-      TaskModel value = taskBox.getAt(i);
-      if(value.category == category){
-        items.add({
-          'task': value.task,
-          'key' : taskBox.keyAt(i),
-          'category' : value.category,
-          'isImportant' : value.isImportant,
-          'isChecked' : value.isChecked
-        });
-      }
-    }
-  }
-  return items;
-}
+// List<Map>  myDayOrTasksOrImportantList(bool? isMyDay, Box taskBox){
+//   late List<Map> items;
+//
+//   if(isMyDay == null){
+//     items = [];
+//     for(int i = 0; i < taskBox.length; i++){
+//       TaskModel value = taskBox.getAt(i);
+//       if(value.isImportant){
+//         items.add({
+//           'task': value.task,
+//           'key' : taskBox.keyAt(i),
+//           'category' : value.category,
+//           'isImportant' : value.isImportant,
+//           'isChecked' : value.isChecked
+//         });
+//       }
+//     }
+//   }else{
+//     items = [];
+//     String category;
+//     category = isMyDay ? 'My day' : 'Tasks';
+//     for(int i = 0; i < taskBox.length; i++){
+//       TaskModel value = taskBox.getAt(i);
+//       if(value.category == category){
+//         items.add({
+//           'task': value.task,
+//           'key' : taskBox.keyAt(i),
+//           'category' : value.category,
+//           'isImportant' : value.isImportant,
+//           'isChecked' : value.isChecked
+//         });
+//       }
+//     }
+//   }
+//   return items;
+// }
 
 List<Map> categoryList(DrawerOptions options, Box taskBox){
   late List<Map> items;

@@ -6,8 +6,10 @@ import 'package:todo/Cubit/tasks_list_cubit.dart';
 import 'package:todo/components/addTaskLayout.dart';
 import 'package:todo/components/category_title.dart';
 import 'package:todo/components/drawer_option_layout.dart';
+import 'package:todo/components/empty_message_widget.dart';
 import 'package:todo/components/task_container.dart';
 import 'package:todo/models/task_model.dart';
+import 'package:todo/screens/test_page.dart';
 
 import '../components/methods.dart';
 
@@ -20,7 +22,9 @@ class Home extends StatefulWidget {
 
 late TextEditingController _controller;
 late FocusNode _focusNode;
-
+// late List<Map> taskList;
+// late List<Map> myDayList;
+// late List<Map> importantList;
 
 List<TaskModel> completedTasks = [];
 final List<DrawerOptions> options = [
@@ -47,18 +51,18 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-
     var listCubit = BlocProvider.of<TasksListCubit>(context);
     var drawerCubit = BlocProvider.of<DrawerCubit>(context);
 
     return BlocBuilder<DrawerCubit, DrawerOptions>(
-      builder: (context, value){
+      builder: (context, value) {
         return GestureDetector(
           onTap: () => _focusNode.unfocus(),
           child: Container(
             decoration: BoxDecoration(
                 image: DecorationImage(
-                    image: AssetImage('images/${getOptionProperties(value)['backgroundImage']}'),
+                    image: AssetImage(
+                        'images/${getOptionProperties(value)['backgroundImage']}'),
                     fit: BoxFit.cover)),
             child: Scaffold(
               backgroundColor: Colors.transparent,
@@ -69,7 +73,13 @@ class _HomeState extends State<Home> {
                   PopupMenuButton(
                     itemBuilder: (context) {
                       return [
-                        const PopupMenuItem(child: Text('Item one')),
+                        PopupMenuItem(
+                          child: const Text('Item one'),
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const TestPage())),
+                        ),
                         const PopupMenuItem(child: Text('Item two')),
                       ];
                     },
@@ -77,130 +87,119 @@ class _HomeState extends State<Home> {
                 ],
               ),
               body: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: ListView(
-                        shrinkWrap: true,
-                        children: [
-                          CategoryTitle(
-                            properties: getOptionProperties(value),
-                          ),
-                          BlocBuilder<TasksListCubit, Box>(
-                            builder: (context, state){
-                              return ListView.builder(
-                                primary: false,
-                                shrinkWrap: true,
-                                itemCount: categoryList(value, state).length,
-                                itemBuilder: (context, index) {
-                                  Map task = categoryList(value, state)[index];
-                                  // TaskModel task = state.getAt(index);
-                                  return Column(
-                                    children: [
-                                      if (index == 0)
-                                        const SizedBox(
-                                          height: 5,
-                                        ),
-                                      TaskContainer(
-                                        dismissibleKey: ValueKey(task['key']),
-                                        item: task,
-                                        index: index,
-                                        checkedOnPressed: () => setState(() => listCubit.updateState(task['key'], true)),
-                                        importantOnPressed: () => setState(() => listCubit.updateState(task['key'], false)),
-                                        onDismissed: (DismissDirection direction) {
-                                          if(direction == DismissDirection.endToStart){
-                                            listCubit.removeTask(task['key']);
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(const SnackBar(
-                                              content: Text('Task Deleted'),
-                                              duration: Duration(seconds: 1),
-                                            ));
-                                          }
-
-                                        },
-                                        confirmDismiss: (DismissDirection direction) async{
-                                          if(direction == DismissDirection.startToEnd){
-                                            _focusNode.requestFocus();
-                                            _controller.text = task['task'];
-                                            return false;
-                                          }
-                                          if(direction == DismissDirection.endToStart){
-                                            // late bool result;
-                                            // showDialog(context: context, builder: (context){
-                                            //   return AlertDialog(
-                                            //     title: const Text('Confirm delete'),
-                                            //     content: const Text('Do you want to delete the task?'),
-                                            //     actions: [
-                                            //       ElevatedButton(
-                                            //         onPressed: (){
-                                            //           Navigator.of(context).pop();
-                                            //           result = false;
-                                            //         },
-                                            //         child: const Text('Cancel'),
-                                            //       ),
-                                            //       ElevatedButton(
-                                            //         onPressed: (){
-                                            //           Navigator.of(context).pop();
-                                            //           result = true;
-                                            //         },
-                                            //         child: const Text('Yes'),
-                                            //       )
-                                            //     ],
-                                            //   );
-                                            // });
-
-                                            return true;
-                                          }
-                                          return null;
-                                        },
-                                      ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: CategoryTitle(
+                      properties: getOptionProperties(value),
+                    ),
+                  ),
+                  BlocBuilder<TasksListCubit, Box>(
+                    builder: (context, state) {
+                      if (categoryList(value, state).isEmpty) {
+                        return EmptyMessageWidget(
+                            imageName: getOptionProperties(value)['emptyMessageImage'],
+                            message: getOptionProperties(value)['emptyMessage']
+                        );
+                      } else {
+                        return Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: categoryList(value, state).length,
+                              itemBuilder: (context, index) {
+                                Map task = categoryList(value, state)[index];
+                                // TaskModel task = state.getAt(index);
+                                return Column(
+                                  children: [
+                                    if (index == 0)
                                       const SizedBox(
                                         height: 5,
-                                      )
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                          ),
+                                      ),
+                                    TaskContainer(
+                                      dismissibleKey: ValueKey(task['key']),
+                                      item: task,
+                                      index: index,
+                                      checkedOnPressed: () => setState(() =>
+                                          listCubit.updateState(
+                                              task['key'], true)),
+                                      importantOnPressed: () => setState(() =>
+                                          listCubit.updateState(
+                                              task['key'], false)),
+                                      onDismissed: (DismissDirection direction) {
+                                        if (direction ==
+                                            DismissDirection.endToStart) {
+                                          listCubit.removeTask(task['key']);
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(const SnackBar(
+                                            content: Text('Task Deleted'),
+                                            duration: Duration(seconds: 1),
+                                          ));
+                                        }
+                                      },
+                                      confirmDismiss:
+                                          (DismissDirection direction) async {
+                                        if (direction ==
+                                            DismissDirection.startToEnd) {
+                                          _focusNode.requestFocus();
+                                          _controller.text = task['task'];
+                                          return false;
+                                        }
+                                        if (direction ==
+                                            DismissDirection.endToStart) {
+                                          // late bool result;
+                                          // showDialog(context: context, builder: (context){
+                                          //   return AlertDialog(
+                                          //     title: const Text('Confirm delete'),
+                                          //     content: const Text('Do you want to delete the task?'),
+                                          //     actions: [
+                                          //       ElevatedButton(
+                                          //         onPressed: (){
+                                          //           Navigator.of(context).pop();
+                                          //           result = false;
+                                          //         },
+                                          //         child: const Text('Cancel'),
+                                          //       ),
+                                          //       ElevatedButton(
+                                          //         onPressed: (){
+                                          //           Navigator.of(context).pop();
+                                          //           result = true;
+                                          //         },
+                                          //         child: const Text('Yes'),
+                                          //       )
+                                          //     ],
+                                          //   );
+                                          // });
 
-                          //completedTasks section
-                          // if (completedTasks.isNotEmpty)
-                          //   ExpansionTile(
-                          //     title: Text('Completed (${completedTasks.length})'),
-                          //     collapsedBackgroundColor: Colors.black38,
-                          //     textColor: Colors.white,
-                          //     collapsedTextColor: Colors.white,
-                          //     collapsedIconColor: Colors.white,
-                          //     iconColor: Colors.white,
-                          //     shape: RoundedRectangleBorder(
-                          //         borderRadius: BorderRadius.circular(10)),
-                          //     collapsedShape: RoundedRectangleBorder(
-                          //         borderRadius: BorderRadius.circular(10)),
-                          //     children: completedTasks.map((e) {
-                          //       int index = tasks.indexOf(e);
-                          //       return TaskContainer(
-                          //         index: index,
-                          //         item: e,
-                          //         dismissibleKey: ValueKey(boxTasks.keyAt(index)),
-                          //       );
-                          //     }).toList(),
-                          //   )
-                        ],
-                      ),
-                    ),
+                                          return true;
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    const SizedBox(
+                                      height: 5,
+                                    )
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      }
+                    },
                   ),
 
                   //Add task section
-                 AddTaskLayout(
-                   iconColor: getOptionProperties(value)['iconColor'],
-                   category: getOptionProperties(value)['title'],
-                   focusNode: _focusNode,
-                   controller: _controller,
-                   value: value,
-                   listCubit: listCubit,
-                 ),
+                  AddTaskLayout(
+                    iconColor: getOptionProperties(value)['iconColor'],
+                    category: getOptionProperties(value)['title'],
+                    focusNode: _focusNode,
+                    controller: _controller,
+                    value: value,
+                    listCubit: listCubit,
+                  ),
                 ],
               ),
               drawer: Drawer(
@@ -218,9 +217,9 @@ class _HomeState extends State<Home> {
                                   shape: BoxShape.circle, color: Colors.blue),
                               child: Center(
                                   child: Text(
-                                    'dj'.toUpperCase(),
-                                    style: const TextStyle(color: Colors.white),
-                                  )),
+                                'dj'.toUpperCase(),
+                                style: const TextStyle(color: Colors.white),
+                              )),
                             ),
                             const SizedBox(
                               width: 10,
@@ -231,7 +230,8 @@ class _HomeState extends State<Home> {
                                 Text(
                                   'David Jeffrey',
                                   style: TextStyle(
-                                      fontSize: 15, fontWeight: FontWeight.w500),
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500),
                                 ),
                                 Text(
                                   'davidjeffrey058@gmail.com',
