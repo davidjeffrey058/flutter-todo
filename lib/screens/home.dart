@@ -39,7 +39,6 @@ class _HomeState extends State<Home> {
     _controller.addListener(() => setState(() {}));
     _focusNode = FocusNode();
 
-    print(boxTasks.length);
   }
 
   @override
