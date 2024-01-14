@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../models/task_model.dart';
 
 class TaskContainer extends StatelessWidget {
   final Key dismissibleKey;
@@ -9,6 +8,7 @@ class TaskContainer extends StatelessWidget {
   final void Function()? checkedOnPressed;
   final void Function()? importantOnPressed;
   final void Function()? onLongPressed;
+  final Future<bool?> Function(DismissDirection)? confirmDismiss;
   final void Function(DismissDirection)? onDismissed;
 
   const TaskContainer({
@@ -19,7 +19,7 @@ class TaskContainer extends StatelessWidget {
       this.importantOnPressed,
       this.onLongPressed,
       required this.dismissibleKey,
-      this.onDismissed
+      this.onDismissed, this.confirmDismiss
     }
   );
 
@@ -27,17 +27,32 @@ class TaskContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dismissible(
       key: dismissibleKey,
-      secondaryBackground: Flexible(
-        child: Container(
+      secondaryBackground: Container(
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadiusDirectional.only(
+              topEnd: Radius.circular(5),
+            bottomEnd: Radius.circular(5)
+          ),
           color: Colors.red,
-          child: const Icon(Icons.delete, color: Colors.white,),
         ),
+        padding: const EdgeInsets.only(right: 30),
+        alignment: Alignment.centerRight,
+        child: const Icon(Icons.delete, color: Colors.white,),
       ),
       background: Container(
-        color: Colors.grey[400],
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadiusDirectional.only(
+              topStart: Radius.circular(5),
+              bottomStart: Radius.circular(5)
+          ),
+          color: Colors.grey[400],
+        ),
+        padding: const EdgeInsets.only(left: 30),
+        alignment: Alignment.centerLeft,
         child: const Icon(Icons.edit, color: Colors.white,),
       ),
       onDismissed: onDismissed,
+      confirmDismiss: confirmDismiss,
       child: Material(
         clipBehavior: Clip.hardEdge,
         color: item['isChecked'] ? Colors.blue[50] : Colors.white,

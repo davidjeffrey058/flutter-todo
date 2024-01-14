@@ -3,13 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 import 'package:todo/Cubit/drawer_cubit.dart';
 import 'package:todo/Cubit/tasks_list_cubit.dart';
-import 'package:todo/components/boxes.dart';
+import 'package:todo/components/addTaskLayout.dart';
 import 'package:todo/components/category_title.dart';
 import 'package:todo/components/drawer_option_layout.dart';
 import 'package:todo/components/task_container.dart';
 import 'package:todo/models/task_model.dart';
 
-import '../components/custom_button.dart';
 import '../components/methods.dart';
 
 class Home extends StatefulWidget {
@@ -19,7 +18,6 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-// late DrawerOptions selectedOption;
 late TextEditingController _controller;
 late FocusNode _focusNode;
 
@@ -38,7 +36,6 @@ class _HomeState extends State<Home> {
     _controller = TextEditingController();
     _controller.addListener(() => setState(() {}));
     _focusNode = FocusNode();
-
   }
 
   @override
@@ -112,9 +109,6 @@ class _HomeState extends State<Home> {
                                         checkedOnPressed: () => setState(() => listCubit.updateState(task['key'], true)),
                                         importantOnPressed: () => setState(() => listCubit.updateState(task['key'], false)),
                                         onDismissed: (DismissDirection direction) {
-                                          if(direction == DismissDirection.startToEnd){
-
-                                          }
                                           if(direction == DismissDirection.endToStart){
                                             listCubit.removeTask(task['key']);
                                             ScaffoldMessenger.of(context)
@@ -124,6 +118,41 @@ class _HomeState extends State<Home> {
                                             ));
                                           }
 
+                                        },
+                                        confirmDismiss: (DismissDirection direction) async{
+                                          if(direction == DismissDirection.startToEnd){
+                                            _focusNode.requestFocus();
+                                            _controller.text = task['task'];
+                                            return false;
+                                          }
+                                          if(direction == DismissDirection.endToStart){
+                                            // late bool result;
+                                            // showDialog(context: context, builder: (context){
+                                            //   return AlertDialog(
+                                            //     title: const Text('Confirm delete'),
+                                            //     content: const Text('Do you want to delete the task?'),
+                                            //     actions: [
+                                            //       ElevatedButton(
+                                            //         onPressed: (){
+                                            //           Navigator.of(context).pop();
+                                            //           result = false;
+                                            //         },
+                                            //         child: const Text('Cancel'),
+                                            //       ),
+                                            //       ElevatedButton(
+                                            //         onPressed: (){
+                                            //           Navigator.of(context).pop();
+                                            //           result = true;
+                                            //         },
+                                            //         child: const Text('Yes'),
+                                            //       )
+                                            //     ],
+                                            //   );
+                                            // });
+
+                                            return true;
+                                          }
+                                          return null;
                                         },
                                       ),
                                       const SizedBox(
@@ -164,79 +193,14 @@ class _HomeState extends State<Home> {
                   ),
 
                   //Add task section
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: Material(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Flexible(
-                                  child: TextFormField(
-                                    focusNode: _focusNode,
-                                    textCapitalization:
-                                    TextCapitalization.sentences,
-                                    decoration: const InputDecoration(
-                                        prefixIcon: Icon(Icons.circle_outlined),
-                                        hintText: 'Add a task',
-                                        border: InputBorder.none),
-                                    controller: _controller,
-                                    onSaved: (value) {},
-                                  ),
-                                ),
-                                IconButton(
-                                  style: ButtonStyle(
-                                      backgroundColor: MaterialStatePropertyAll(
-                                          _controller.text.isEmpty
-                                              ? Colors.grey[400]
-                                              : getOptionProperties(value)['iconColor']),
-                                      shape: MaterialStatePropertyAll(
-                                          RoundedRectangleBorder(
-                                              borderRadius:
-                                              BorderRadius.circular(10)))),
-                                  onPressed: _controller.text.isEmpty
-                                      ? null
-                                      : () {
-                                    listCubit.addTask(TaskModel(
-                                        task: _controller.text,
-                                        isChecked: false,
-                                        isImportant: value == DrawerOptions.important? true : false,
-                                        category: value == DrawerOptions.important ? 'Tasks' : getOptionProperties(value)['title'])
-                                    );
-                                    _controller.clear();
-                                  },
-                                  icon: const Icon(
-                                    Icons.arrow_upward,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (_controller.text.isNotEmpty)
-                              const Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  CustomButton(
-                                    text: 'Set Due Date',
-                                    icon: Icon(Icons.calendar_month),
-                                  ),
-                                  CustomButton(
-                                    text: 'Remind me',
-                                    icon: Icon(Icons.notifications),
-                                  ),
-                                  CustomButton(
-                                    text: 'Repeat',
-                                    icon: Icon(Icons.repeat),
-                                  ),
-                                ],
-                              )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                 AddTaskLayout(
+                   iconColor: getOptionProperties(value)['iconColor'],
+                   category: getOptionProperties(value)['title'],
+                   focusNode: _focusNode,
+                   controller: _controller,
+                   value: value,
+                   listCubit: listCubit,
+                 ),
                 ],
               ),
               drawer: Drawer(
