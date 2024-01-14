@@ -23,7 +23,7 @@ class Home extends StatefulWidget {
 late TextEditingController _controller;
 late FocusNode _focusNode;
 
-List<TaskModel> tasks = [];
+
 List<TaskModel> completedTasks = [];
 final List<DrawerOptions> options = [
   DrawerOptions.myDay,
@@ -35,10 +35,11 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    // selectedOption = DrawerOptions.tasks;
     _controller = TextEditingController();
     _controller.addListener(() => setState(() {}));
     _focusNode = FocusNode();
+
+    print(boxTasks.length);
   }
 
   @override
@@ -50,6 +51,10 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+
+    var listCubit = BlocProvider.of<TasksListCubit>(context);
+    var drawerCubit = BlocProvider.of<DrawerCubit>(context);
+
     return BlocBuilder<DrawerCubit, DrawerOptions>(
       builder: (context, value){
         return GestureDetector(
@@ -91,9 +96,10 @@ class _HomeState extends State<Home> {
                               return ListView.builder(
                                 primary: false,
                                 shrinkWrap: true,
-                                itemCount: boxTasks.length,
+                                itemCount: categoryList(value, state).length,
                                 itemBuilder: (context, index) {
-                                  TaskModel task = state.getAt(index);
+                                  Map task = categoryList(value, state)[index];
+                                  // TaskModel task = state.getAt(index);
                                   return Column(
                                     children: [
                                       if (index == 0)
@@ -101,19 +107,17 @@ class _HomeState extends State<Home> {
                                           height: 5,
                                         ),
                                       TaskContainer(
-                                        dismissibleKey: ValueKey(boxTasks.keyAt(index)),
+                                        dismissibleKey: ValueKey(task['key']),
                                         item: task,
                                         index: index,
-                                        checkedOnPressed: () =>
-                                            setState(() => updateState(index, true)),
-                                        importantOnPressed: () =>
-                                            setState(() => updateState(index, false)),
+                                        checkedOnPressed: () => setState(() => listCubit.updateState(task['key'], true)),
+                                        importantOnPressed: () => setState(() => listCubit.updateState(task['key'], false)),
                                         onDismissed: (DismissDirection direction) {
                                           if(direction == DismissDirection.startToEnd){
 
                                           }
                                           if(direction == DismissDirection.endToStart){
-                                            setState(() => removeTask(index));
+                                            listCubit.removeTask(task['key']);
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(const SnackBar(
                                               content: Text('Task Deleted'),
@@ -134,27 +138,27 @@ class _HomeState extends State<Home> {
                           ),
 
                           //completedTasks section
-                          if (completedTasks.isNotEmpty)
-                            ExpansionTile(
-                              title: Text('Completed (${completedTasks.length})'),
-                              collapsedBackgroundColor: Colors.black38,
-                              textColor: Colors.white,
-                              collapsedTextColor: Colors.white,
-                              collapsedIconColor: Colors.white,
-                              iconColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              collapsedShape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              children: completedTasks.map((e) {
-                                int index = tasks.indexOf(e);
-                                return TaskContainer(
-                                  index: index,
-                                  item: e,
-                                  dismissibleKey: ValueKey(boxTasks.keyAt(index)),
-                                );
-                              }).toList(),
-                            )
+                          // if (completedTasks.isNotEmpty)
+                          //   ExpansionTile(
+                          //     title: Text('Completed (${completedTasks.length})'),
+                          //     collapsedBackgroundColor: Colors.black38,
+                          //     textColor: Colors.white,
+                          //     collapsedTextColor: Colors.white,
+                          //     collapsedIconColor: Colors.white,
+                          //     iconColor: Colors.white,
+                          //     shape: RoundedRectangleBorder(
+                          //         borderRadius: BorderRadius.circular(10)),
+                          //     collapsedShape: RoundedRectangleBorder(
+                          //         borderRadius: BorderRadius.circular(10)),
+                          //     children: completedTasks.map((e) {
+                          //       int index = tasks.indexOf(e);
+                          //       return TaskContainer(
+                          //         index: index,
+                          //         item: e,
+                          //         dismissibleKey: ValueKey(boxTasks.keyAt(index)),
+                          //       );
+                          //     }).toList(),
+                          //   )
                         ],
                       ),
                     ),
@@ -196,18 +200,12 @@ class _HomeState extends State<Home> {
                                   onPressed: _controller.text.isEmpty
                                       ? null
                                       : () {
-                                    setState(() {
-                                      addTask(
-                                          TaskModel(
-                                              task: _controller.text,
-                                              isChecked: false,
-                                              isImportant: false,
-                                              category: value ==
-                                                  DrawerOptions.important
-                                                  ? 'Tasks'
-                                                  : getOptionProperties(value)['title'])
-                                      );
-                                    });
+                                    listCubit.addTask(TaskModel(
+                                        task: _controller.text,
+                                        isChecked: false,
+                                        isImportant: value == DrawerOptions.important? true : false,
+                                        category: value == DrawerOptions.important ? 'Tasks' : getOptionProperties(value)['title'])
+                                    );
                                     _controller.clear();
                                   },
                                   icon: const Icon(
@@ -296,7 +294,7 @@ class _HomeState extends State<Home> {
                                 color: getOptionProperties(option)['iconColor'],
                                 isSelected: option == value,
                                 optionOnPressed: () {
-                                  BlocProvider.of<DrawerCubit>(context).selectedOption(option);
+                                  drawerCubit.selectedOption(option);
                                   Navigator.pop(context);
                                 },
                               ),

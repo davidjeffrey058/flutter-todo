@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:todo/components/boxes.dart';
+import 'package:hive/hive.dart';
 import 'package:todo/models/task_model.dart';
 
 import '../screens/home.dart';
@@ -30,32 +30,59 @@ Map<String, dynamic> getOptionProperties(DrawerOptions option){
   }
 }
 
-void addTask(TaskModel value) => boxTasks.add(value);
+// void removeTask(int index) => boxTasks.deleteAt(index);
 
-void removeTask(int index) => boxTasks.deleteAt(index);
+List<Map> categoryList(DrawerOptions options, Box taskBox){
+  late List<Map> items;
 
-void updateState(int index, bool forChecked) {
-  TaskModel item = boxTasks.getAt(index);
+  switch (options){
+    case DrawerOptions.myDay:
+      items = [];
+      for(int i = 0; i < taskBox.length; i++){
+        TaskModel value = taskBox.getAt(i);
+        if(value.category == 'My day'){
+          items.add({
+            'task': value.task,
+            'key' : taskBox.keyAt(i),
+            'category' : value.category,
+            'isImportant' : value.isImportant,
+            'isChecked' : value.isChecked
+          });
+        }
+      }
+      return items;
 
-  if (forChecked) {
-    boxTasks.putAt(
-        index,
-        TaskModel(
-            task: item.task,
-            isChecked: !item.isChecked,
-            isImportant: item.isImportant,
-            category: item.category
-        )
-    );
-  } else{
-    boxTasks.putAt(
-        index,
-        TaskModel(
-            task: item.task,
-            isChecked: item.isChecked,
-            isImportant: !item.isImportant,
-            category: item.category
-        )
-    );
+    case DrawerOptions.tasks:
+      items = [];
+      for(int i = 0; i < taskBox.length; i++){
+        TaskModel value = taskBox.getAt(i);
+        if(value.category == 'Tasks'){
+          items.add({
+            'task': value.task,
+            'key' : taskBox.keyAt(i),
+            'category' : value.category,
+            'isImportant' : value.isImportant,
+            'isChecked' : value.isChecked
+          });
+        }
+      }
+      return items;
+
+    case DrawerOptions.important:
+      items = [];
+      for(int i = 0; i < taskBox.length; i++){
+        TaskModel value = taskBox.getAt(i);
+        if(value.isImportant){
+          items.add({
+            'task': value.task,
+            'key' : taskBox.keyAt(i),
+            'category' : value.category,
+            'isImportant' : value.isImportant,
+            'isChecked' : value.isChecked
+          });
+        }
+      }
+      return items;
   }
 }
+

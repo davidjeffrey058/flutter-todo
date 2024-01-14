@@ -5,7 +5,7 @@ import '../models/task_model.dart';
 class TaskContainer extends StatelessWidget {
   final Key dismissibleKey;
   final int index;
-  final TaskModel item;
+  final Map item;
   final void Function()? checkedOnPressed;
   final void Function()? importantOnPressed;
   final void Function()? onLongPressed;
@@ -40,28 +40,28 @@ class TaskContainer extends StatelessWidget {
       onDismissed: onDismissed,
       child: Material(
         clipBehavior: Clip.hardEdge,
-        color: item.isChecked ? Colors.blue[50] : Colors.white,
+        color: item['isChecked'] ? Colors.blue[50] : Colors.white,
         borderRadius: BorderRadius.circular(5),
         child: ListTile(
           onLongPress: onLongPressed,
           contentPadding: const EdgeInsets.symmetric(vertical: 10),
           title: Text(
-            item.task,
+            item['task'],
             style: TextStyle(
-                color: item.isChecked ? Colors.grey : Colors.black,
-                fontStyle: item.isChecked ? FontStyle.italic : FontStyle.normal,
-                decoration: item.isChecked
+                color: item['isChecked'] ? Colors.grey : Colors.black,
+                fontStyle: item['isChecked'] ? FontStyle.italic : FontStyle.normal,
+                decoration: item['isChecked']
                     ? TextDecoration.lineThrough
                     : TextDecoration.none),
           ),
           leading: IconButton(
-            icon: item.isChecked
+            icon: item['isChecked']
                 ? const Icon(Icons.check_circle)
                 : const Icon(Icons.circle_outlined),
             onPressed: checkedOnPressed,
           ),
           trailing: IconButton(
-            icon: item.isImportant
+            icon: item['isImportant']
                 ? const Icon(Icons.star_rate_rounded, color: Colors.amberAccent)
                 : const Icon(
                     Icons.star_border_rounded,

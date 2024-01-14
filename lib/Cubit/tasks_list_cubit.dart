@@ -7,5 +7,41 @@ import '../models/task_model.dart';
 class TasksListCubit extends Cubit<Box>{
   TasksListCubit() : super(boxTasks);
 
-  void addTask(TaskModel value) => emit(state.add(value) as Box);
+  Future<int> addTask(TaskModel value){
+    return state.add(value);
+  }
+
+  void removeTask(dynamic key){
+    state.delete(key);
+  }
+
+  void updateState(dynamic key, bool forChecked) {
+    TaskModel item = state.get(key);
+
+    if (forChecked) {
+      state.put(
+          key,
+          TaskModel(
+              task: item.task,
+              isChecked: !item.isChecked,
+              isImportant: item.isImportant,
+              category: item.category
+          )
+      );
+      emit(state);
+    } else{
+      state.put(
+          key,
+          TaskModel(
+              task: item.task,
+              isChecked: item.isChecked,
+              isImportant: !item.isImportant,
+              category: item.category
+          )
+      );
+    }
+    emit(state);
+  }
+
+
 }
