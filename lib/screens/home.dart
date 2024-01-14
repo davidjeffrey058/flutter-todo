@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:todo/Cubit/drawer_cubit.dart';
 import 'package:todo/Cubit/tasks_list_cubit.dart';
 import 'package:todo/components/addTaskLayout.dart';
+import 'package:todo/components/boxes.dart';
 import 'package:todo/components/category_title.dart';
 import 'package:todo/components/drawer_option_layout.dart';
 import 'package:todo/components/empty_message_widget.dart';
@@ -19,7 +20,9 @@ class Home extends StatefulWidget {
   @override
   State<Home> createState() => _HomeState();
 }
-
+late int myDayListLength;
+late int taskListLength;
+late int importantListLength;
 late TextEditingController _controller;
 late FocusNode _focusNode;
 // late List<Map> taskList;
@@ -53,6 +56,9 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     var listCubit = BlocProvider.of<TasksListCubit>(context);
     var drawerCubit = BlocProvider.of<DrawerCubit>(context);
+    myDayListLength = categoryList(DrawerOptions.myDay, boxTasks).length;
+    taskListLength = categoryList(DrawerOptions.tasks, boxTasks).length;
+    importantListLength = categoryList(DrawerOptions.important, boxTasks).length;
 
     return BlocBuilder<DrawerCubit, DrawerOptions>(
       builder: (context, value) {
@@ -122,16 +128,11 @@ class _HomeState extends State<Home> {
                                       dismissibleKey: ValueKey(task['key']),
                                       item: task,
                                       index: index,
-                                      checkedOnPressed: () => setState(() =>
-                                          listCubit.updateState(
-                                              task['key'], true)),
-                                      importantOnPressed: () => setState(() =>
-                                          listCubit.updateState(
-                                              task['key'], false)),
+                                      checkedOnPressed: () => setState(() => listCubit.updateState(task['key'], true)),
+                                      importantOnPressed: () => setState(() => listCubit.updateState(task['key'], false)),
                                       onDismissed: (DismissDirection direction) {
-                                        if (direction ==
-                                            DismissDirection.endToStart) {
-                                          listCubit.removeTask(task['key']);
+                                        if (direction == DismissDirection.endToStart) {
+                                          setState(() => listCubit.removeTask(task['key']));
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(const SnackBar(
                                             content: Text('Task Deleted'),
@@ -139,8 +140,7 @@ class _HomeState extends State<Home> {
                                           ));
                                         }
                                       },
-                                      confirmDismiss:
-                                          (DismissDirection direction) async {
+                                      confirmDismiss: (DismissDirection direction) async {
                                         if (direction ==
                                             DismissDirection.startToEnd) {
                                           _focusNode.requestFocus();
@@ -260,6 +260,7 @@ class _HomeState extends State<Home> {
                                   drawerCubit.selectedOption(option);
                                   Navigator.pop(context);
                                 },
+                                listLength: returnLength(option),
                               ),
                             );
                           }).toList(),
@@ -281,6 +282,17 @@ enum DrawerOptions {
   myDay,
   tasks,
   important,
+}
+
+int returnLength(DrawerOptions option){
+  switch(option){
+    case DrawerOptions.myDay:
+      return myDayListLength;
+    case DrawerOptions.tasks:
+      return taskListLength;
+    case DrawerOptions.important:
+      return importantListLength;
+  }
 }
 
 enum TaskOptions { delete, edit }
