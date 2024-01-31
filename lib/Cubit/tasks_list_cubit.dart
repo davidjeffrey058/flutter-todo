@@ -43,5 +43,15 @@ class TasksListCubit extends Cubit<Box>{
     emit(state);
   }
 
+  void updateTask(dynamic key, String text){
+    TaskModel item = state.get(key);
+    state.put(key, TaskModel(
+        task: text,
+        isChecked: item.isChecked,
+        isImportant: item.isImportant,
+        category: item.category
+    ));
+    emit(state);
+  }
 
 }

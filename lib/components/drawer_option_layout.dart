@@ -38,13 +38,9 @@ class DrawerOptionLayout extends StatelessWidget {
               const Expanded(
                 child: SizedBox(),
               ),
-              if(listLength != null)Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-                child: Text(
-                  '$listLength',
-                  style: const TextStyle(color: Colors.white),
-                ),
+              if(listLength != null && listLength != 0)Text(
+                '$listLength',
+                style: const TextStyle(color: Colors.grey),
               )
             ],
           ),

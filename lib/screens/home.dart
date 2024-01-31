@@ -25,6 +25,7 @@ late int taskListLength;
 late int importantListLength;
 late TextEditingController _controller;
 late FocusNode _focusNode;
+late TextEditingController _editingController;
 // late List<Map> taskList;
 // late List<Map> myDayList;
 // late List<Map> importantList;
@@ -43,6 +44,7 @@ class _HomeState extends State<Home> {
     _controller = TextEditingController();
     _controller.addListener(() => setState(() {}));
     _focusNode = FocusNode();
+    _editingController = TextEditingController();
   }
 
   @override
@@ -50,10 +52,12 @@ class _HomeState extends State<Home> {
     super.dispose();
     _controller.dispose();
     _focusNode.dispose();
+    _editingController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+
     var listCubit = BlocProvider.of<TasksListCubit>(context);
     var drawerCubit = BlocProvider.of<DrawerCubit>(context);
     myDayListLength = categoryList(DrawerOptions.myDay, boxTasks).length;
@@ -143,8 +147,35 @@ class _HomeState extends State<Home> {
                                       confirmDismiss: (DismissDirection direction) async {
                                         if (direction ==
                                             DismissDirection.startToEnd) {
-                                          _focusNode.requestFocus();
-                                          _controller.text = task['task'];
+                                          // _focusNode.requestFocus();
+                                          _editingController.text = task['task'];
+
+                                          showDialog(context: context, builder: (context){
+                                            return AlertDialog(
+                                              title: const Text('Edit task'),
+                                              content: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  TextFormField(
+                                                    minLines: 2,
+                                                    maxLines: 3,
+                                                    controller: _editingController,
+                                                    autofocus: true,
+                                                  )
+                                                ],
+                                              ),
+                                              actions: [
+                                                OutlinedButton(onPressed: (){
+                                                  setState(() {
+                                                    listCubit.updateTask(task['key'], _editingController.text);
+                                                  });
+
+                                                  Navigator.pop(context);
+                                                }, child: const Text('Save')),
+                                                OutlinedButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel'))
+                                              ],
+                                            );
+                                          });
                                           return false;
                                         }
                                         if (direction ==
