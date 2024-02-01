@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive/hive.dart';
 import 'package:todo/Cubit/drawer_cubit.dart';
-import 'package:todo/Cubit/tasks_list_cubit.dart';
-import 'package:todo/components/addTaskLayout.dart';
-import 'package:todo/components/boxes.dart';
+import 'package:todo/bloc/task_list_bloc.dart';
 import 'package:todo/components/category_title.dart';
-import 'package:todo/components/drawer_option_layout.dart';
+import 'package:todo/components/drawer_layout.dart';
 import 'package:todo/components/empty_message_widget.dart';
 import 'package:todo/components/task_container.dart';
 import 'package:todo/models/task_model.dart';
 import 'package:todo/screens/test_page.dart';
 
+import '../components/add_task_layout.dart';
 import '../components/methods.dart';
 
 class Home extends StatefulWidget {
@@ -20,18 +18,17 @@ class Home extends StatefulWidget {
   @override
   State<Home> createState() => _HomeState();
 }
-late int myDayListLength;
-late int taskListLength;
-late int importantListLength;
+int myDayListLength = 0;
+int taskListLength = 0;
+int importantListLength = 0;
+
 late TextEditingController _controller;
 late FocusNode _focusNode;
 late TextEditingController _editingController;
 late ScrollController _scrollController;
-// late List<Map> taskList;
-// late List<Map> myDayList;
-// late List<Map> importantList;
 
 List<TaskModel> completedTasks = [];
+
 final List<DrawerOptions> options = [
   DrawerOptions.myDay,
   DrawerOptions.tasks,
@@ -61,11 +58,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
 
-    var listCubit = BlocProvider.of<TasksListCubit>(context);
-    var drawerCubit = BlocProvider.of<DrawerCubit>(context);
-    myDayListLength = categoryList(DrawerOptions.myDay, boxTasks).length;
-    taskListLength = categoryList(DrawerOptions.tasks, boxTasks).length;
-    importantListLength = categoryList(DrawerOptions.important, boxTasks).length;
+    var listBloc = BlocProvider.of<TaskListBloc>(context);
 
     return BlocBuilder<DrawerCubit, DrawerOptions>(
       builder: (context, value) {
@@ -108,9 +101,10 @@ class _HomeState extends State<Home> {
                       properties: getOptionProperties(value),
                     ),
                   ),
-                  BlocBuilder<TasksListCubit, Box>(
+                  BlocBuilder<TaskListBloc, TaskListState>(
                     builder: (context, state) {
-                      if (categoryList(value, state).isEmpty) {
+
+                      if (categoryList(value, state.tasks).isEmpty) {
                         return EmptyMessageWidget(
                             imageName: getOptionProperties(value)['emptyMessageImage'],
                             message: getOptionProperties(value)['emptyMessage']
@@ -122,10 +116,15 @@ class _HomeState extends State<Home> {
                             child: ListView.builder(
                               controller: _scrollController,
                               shrinkWrap: true,
-                              itemCount: categoryList(value, state).length,
+                              itemCount: categoryList(value, state.tasks).length,
                               itemBuilder: (context, index) {
-                                Map task = categoryList(value, state)[index];
-                                // TaskModel task = state.getAt(index);
+                                Map task = categoryList(value, state.tasks)[index];
+
+                                //Gets number of tasks per category
+                                myDayListLength = categoryList(DrawerOptions.myDay, state.tasks).length;
+                                taskListLength = categoryList(DrawerOptions.tasks, state.tasks).length;
+                                importantListLength = categoryList(DrawerOptions.important, state.tasks).length;
+
                                 return Column(
                                   children: [
                                     if (index == 0)
@@ -136,11 +135,26 @@ class _HomeState extends State<Home> {
                                       dismissibleKey: ValueKey(task['key']),
                                       item: task,
                                       index: index,
-                                      checkedOnPressed: () => setState(() => listCubit.updateState(task['key'], true)),
-                                      importantOnPressed: () => setState(() => listCubit.updateState(task['key'], false)),
+                                      checkedOnPressed: () {
+                                        listBloc.add(UpdateTask(task: TaskModel(
+                                          task: task['task'],
+                                          isChecked: !task['isChecked'],
+                                          isImportant: task['isImportant'],
+                                          category: task['category']
+                                        ), key: task['key'])
+                                        );
+                                      },
+                                      importantOnPressed: (){
+                                        listBloc.add(UpdateTask(task: TaskModel(
+                                            task: task['task'],
+                                            isChecked: task['isChecked'],
+                                            isImportant: !task['isImportant'],
+                                            category: task['category']
+                                        ), key: task['key']));
+                                      },
                                       onDismissed: (DismissDirection direction) {
                                         if (direction == DismissDirection.endToStart) {
-                                          setState(() => listCubit.removeTask(task['key']));
+                                          listBloc.add(DeleteTask(key: task['key']));
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(const SnackBar(
                                             content: Text('Task Deleted'),
@@ -149,11 +163,9 @@ class _HomeState extends State<Home> {
                                         }
                                       },
                                       confirmDismiss: (DismissDirection direction) async {
-                                        if (direction ==
-                                            DismissDirection.startToEnd) {
-                                          // _focusNode.requestFocus();
-                                          _editingController.text = task['task'];
+                                        if (direction == DismissDirection.startToEnd) {
 
+                                          _editingController.text = task['task'];
                                           showDialog(context: context, builder: (context){
                                             return AlertDialog(
                                               title: const Text('Edit task'),
@@ -170,9 +182,12 @@ class _HomeState extends State<Home> {
                                               ),
                                               actions: [
                                                 OutlinedButton(onPressed: (){
-                                                  setState(() {
-                                                    listCubit.updateTask(task['key'], _editingController.text);
-                                                  });
+                                                  listBloc.add(UpdateTask(task: TaskModel(
+                                                      task: _editingController.text,
+                                                      isChecked: task['isChecked'],
+                                                      isImportant: task['isImportant'],
+                                                      category: task['category']
+                                                  ), key: task['key']));
 
                                                   Navigator.pop(context);
                                                 }, child: const Text('Save')),
@@ -182,32 +197,7 @@ class _HomeState extends State<Home> {
                                           });
                                           return false;
                                         }
-                                        if (direction ==
-                                            DismissDirection.endToStart) {
-                                          // late bool result;
-                                          // showDialog(context: context, builder: (context){
-                                          //   return AlertDialog(
-                                          //     title: const Text('Confirm delete'),
-                                          //     content: const Text('Do you want to delete the task?'),
-                                          //     actions: [
-                                          //       ElevatedButton(
-                                          //         onPressed: (){
-                                          //           Navigator.of(context).pop();
-                                          //           result = false;
-                                          //         },
-                                          //         child: const Text('Cancel'),
-                                          //       ),
-                                          //       ElevatedButton(
-                                          //         onPressed: (){
-                                          //           Navigator.of(context).pop();
-                                          //           result = true;
-                                          //         },
-                                          //         child: const Text('Yes'),
-                                          //       )
-                                          //     ],
-                                          //   );
-                                          // });
-
+                                        if (direction == DismissDirection.endToStart) {
                                           return true;
                                         }
                                         return null;
@@ -234,78 +224,17 @@ class _HomeState extends State<Home> {
                     focusNode: _focusNode,
                     controller: _controller,
                     value: value,
-                    listCubit: listCubit,
+                    listBloc: listBloc,
                   ),
                 ],
               ),
-              drawer: Drawer(
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: const BoxDecoration(
-                                  shape: BoxShape.circle, color: Colors.blue),
-                              child: Center(
-                                  child: Text(
-                                'dj'.toUpperCase(),
-                                style: const TextStyle(color: Colors.white),
-                              )),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            const Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'David Jeffrey',
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                                Text(
-                                  'davidjeffrey058@gmail.com',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        ListView(
-                          shrinkWrap: true,
-                          children: options.map((option) {
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 5),
-                              child: DrawerOptionLayout(
-                                name: getOptionProperties(option)['title'],
-                                icon: getOptionProperties(option)['iconData'],
-                                color: getOptionProperties(option)['iconColor'],
-                                isSelected: option == value,
-                                optionOnPressed: () {
-                                  drawerCubit.selectedOption(option);
-                                  Navigator.pop(context);
-                                },
-                                listLength: returnLength(option),
-                              ),
-                            );
-                          }).toList(),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+
+
+              drawer: DrawerLayout(
+                options: options,
+                drawerOption: value,
+                lengthList: [myDayListLength, taskListLength, importantListLength],
+              )
             ),
           ),
         );

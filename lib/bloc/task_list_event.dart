@@ -12,19 +12,18 @@ class AddTask extends TaskListEvent{
 class RemoveTask extends TaskListEvent{
   final TaskModel task;
 
-  RemoveTask(this.task);
+  RemoveTask({required this.task});
 }
 
 class DeleteTask extends TaskListEvent{
   final dynamic key;
-  final TaskModel task;
 
-  DeleteTask(this.key, this.task);
+  DeleteTask({required this.key,});
 }
 
 class UpdateTask extends TaskListEvent{
   final TaskModel task;
   final dynamic key;
 
-  UpdateTask(this.task, this.key);
+  UpdateTask({required this.task, required this.key});
 }

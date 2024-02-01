@@ -36,43 +36,6 @@ Map<String, dynamic> getOptionProperties(DrawerOptions option){
   }
 }
 
-// List<Map>  myDayOrTasksOrImportantList(bool? isMyDay, Box taskBox){
-//   late List<Map> items;
-//
-//   if(isMyDay == null){
-//     items = [];
-//     for(int i = 0; i < taskBox.length; i++){
-//       TaskModel value = taskBox.getAt(i);
-//       if(value.isImportant){
-//         items.add({
-//           'task': value.task,
-//           'key' : taskBox.keyAt(i),
-//           'category' : value.category,
-//           'isImportant' : value.isImportant,
-//           'isChecked' : value.isChecked
-//         });
-//       }
-//     }
-//   }else{
-//     items = [];
-//     String category;
-//     category = isMyDay ? 'My day' : 'Tasks';
-//     for(int i = 0; i < taskBox.length; i++){
-//       TaskModel value = taskBox.getAt(i);
-//       if(value.category == category){
-//         items.add({
-//           'task': value.task,
-//           'key' : taskBox.keyAt(i),
-//           'category' : value.category,
-//           'isImportant' : value.isImportant,
-//           'isChecked' : value.isChecked
-//         });
-//       }
-//     }
-//   }
-//   return items;
-// }
-
 List<Map> categoryList(DrawerOptions options, Box taskBox){
   late List<Map> items;
 

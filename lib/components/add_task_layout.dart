@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:todo/Cubit/tasks_list_cubit.dart';
+import 'package:todo/bloc/task_list_bloc.dart';
 import 'package:todo/screens/home.dart';
 
 import '../models/task_model.dart';
@@ -10,7 +10,7 @@ class AddTaskLayout extends StatelessWidget {
   final FocusNode focusNode;
   final TextEditingController controller;
   final Color iconColor;
-  final TasksListCubit listCubit;
+  final TaskListBloc listBloc;
   final String category;
   final ScrollController scrollController;
 
@@ -20,7 +20,7 @@ class AddTaskLayout extends StatelessWidget {
       required this.controller,
       required this.value,
       required this.iconColor,
-      required this.listCubit,
+      required this.listBloc,
       required this.category,
       required this.scrollController});
 
@@ -58,7 +58,7 @@ class AddTaskLayout extends StatelessWidget {
                     onPressed: controller.text.isEmpty
                         ? null
                         : () {
-                            listCubit.addTask(TaskModel(
+                            listBloc.add(AddTask(task: TaskModel(
                                 task: controller.text,
                                 isChecked: false,
                                 isImportant: value == DrawerOptions.important
@@ -66,7 +66,9 @@ class AddTaskLayout extends StatelessWidget {
                                     : false,
                                 category: value == DrawerOptions.important
                                     ? 'Tasks'
-                                    : category));
+                                    : category)
+                            ));
+
                             controller.clear();
                             scrollController.animateTo(
                                 0.0,
