@@ -70,9 +70,7 @@ class TaskContainer extends StatelessWidget {
                     : TextDecoration.none),
           ),
           leading: IconButton(
-            icon: item['isChecked']
-                ? const Icon(Icons.check_circle)
-                : const Icon(Icons.circle_outlined),
+            icon: item['isChecked'] ? const Icon(Icons.check_circle) : const Icon(Icons.circle_outlined),
             onPressed: checkedOnPressed,
           ),
           trailing: IconButton(

@@ -79,7 +79,7 @@ List<Map> categoryList(DrawerOptions options, Box taskBox){
   switch (options){
     case DrawerOptions.myDay:
       items = [];
-      for(int i = 0; i < taskBox.length; i++){
+      for(int i = taskBox.length - 1; i >= 0; i--){
         TaskModel value = taskBox.getAt(i);
         if(value.category == 'My day'){
           items.add({
@@ -95,7 +95,7 @@ List<Map> categoryList(DrawerOptions options, Box taskBox){
 
     case DrawerOptions.tasks:
       items = [];
-      for(int i = 0; i < taskBox.length; i++){
+      for(int i = taskBox.length - 1; i >= 0; i--){
         TaskModel value = taskBox.getAt(i);
         if(value.category == 'Tasks'){
           items.add({
@@ -111,7 +111,7 @@ List<Map> categoryList(DrawerOptions options, Box taskBox){
 
     case DrawerOptions.important:
       items = [];
-      for(int i = 0; i < taskBox.length; i++){
+      for(int i = taskBox.length - 1; i >= 0; i--){
         TaskModel value = taskBox.getAt(i);
         if(value.isImportant){
           items.add({

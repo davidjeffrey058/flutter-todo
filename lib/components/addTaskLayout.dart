@@ -12,6 +12,7 @@ class AddTaskLayout extends StatelessWidget {
   final Color iconColor;
   final TasksListCubit listCubit;
   final String category;
+  final ScrollController scrollController;
 
   const AddTaskLayout(
       {super.key,
@@ -19,7 +20,9 @@ class AddTaskLayout extends StatelessWidget {
       required this.controller,
       required this.value,
       required this.iconColor,
-      required this.listCubit, required this.category});
+      required this.listCubit,
+      required this.category,
+      required this.scrollController});
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +68,11 @@ class AddTaskLayout extends StatelessWidget {
                                     ? 'Tasks'
                                     : category));
                             controller.clear();
+                            scrollController.animateTo(
+                                0.0,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeIn
+                            );
                           },
                     icon: const Icon(
                       Icons.arrow_upward,

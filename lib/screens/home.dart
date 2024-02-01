@@ -26,6 +26,7 @@ late int importantListLength;
 late TextEditingController _controller;
 late FocusNode _focusNode;
 late TextEditingController _editingController;
+late ScrollController _scrollController;
 // late List<Map> taskList;
 // late List<Map> myDayList;
 // late List<Map> importantList;
@@ -45,6 +46,7 @@ class _HomeState extends State<Home> {
     _controller.addListener(() => setState(() {}));
     _focusNode = FocusNode();
     _editingController = TextEditingController();
+    _scrollController = ScrollController();
   }
 
   @override
@@ -53,6 +55,7 @@ class _HomeState extends State<Home> {
     _controller.dispose();
     _focusNode.dispose();
     _editingController.dispose();
+    _scrollController.dispose();
   }
 
   @override
@@ -117,6 +120,7 @@ class _HomeState extends State<Home> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10.0),
                             child: ListView.builder(
+                              controller: _scrollController,
                               shrinkWrap: true,
                               itemCount: categoryList(value, state).length,
                               itemBuilder: (context, index) {
@@ -224,6 +228,7 @@ class _HomeState extends State<Home> {
 
                   //Add task section
                   AddTaskLayout(
+                    scrollController: _scrollController,
                     iconColor: getOptionProperties(value)['iconColor'],
                     category: getOptionProperties(value)['title'],
                     focusNode: _focusNode,
