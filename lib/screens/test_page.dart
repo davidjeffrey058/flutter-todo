@@ -19,7 +19,6 @@ class _TestPageState extends State<TestPage> with SingleTickerProviderStateMixin
     colorAnimation = ColorTween(begin: Colors.white, end: Colors.red).animate(controller);
     animation = Tween<double>(begin: 70, end: 140).animate(CurvedAnimation(parent: controller, curve: Curves.easeIn));
 
-    print(animation.value);
 
     controller.addStatusListener((status) {
       if(status == AnimationStatus.forward){
