@@ -28,80 +28,92 @@ class AddTaskLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
-      child: Material(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Flexible(
-                    child: TextFormField(
-                      focusNode: focusNode,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.circle_outlined),
-                          hintText: 'Add a task',
-                          border: InputBorder.none),
-                      controller: controller,
-                      onSaved: (value) {},
-                    ),
-                  ),
-                  IconButton(
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(
-                            controller.text.isEmpty
-                                ? Colors.grey[400]
-                                : iconColor),
-                        shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)))),
-                    onPressed: controller.text.isEmpty
-                        ? null
-                        : () {
-                            listBloc.add(AddTask(task: TaskModel(
-                                task: controller.text,
-                                isChecked: false,
-                                isImportant: value == DrawerOptions.important
-                                    ? true
-                                    : false,
-                                category: value == DrawerOptions.important
-                                    ? 'Tasks'
-                                    : category)
-                            ));
-
-                            controller.clear();
-                            scrollController.animateTo(
-                                0.0,
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeIn
-                            );
-                          },
-                    icon: const Icon(
-                      Icons.arrow_upward,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-              if (controller.text.isNotEmpty)
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: Container(
+        decoration: BoxDecoration(
+          boxShadow:focusNode.hasFocus ? [
+            BoxShadow(
+              color: Colors.grey.shade300.withOpacity(0.5),
+              offset: const Offset(0, -1),
+              blurRadius: 6,
+              spreadRadius: 3
+            )
+          ] : null
+        ),
+        child: Material(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Row(
                   children: [
-                    CustomButton(
-                      text: 'Set Due Date',
-                      icon: Icon(Icons.calendar_month),
+                    Flexible(
+                      child: TextFormField(
+                        focusNode: focusNode,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.circle_outlined),
+                            hintText: 'Add a task',
+                            border: InputBorder.none),
+                        controller: controller,
+                        onSaved: (value) {},
+                      ),
                     ),
-                    CustomButton(
-                      text: 'Remind me',
-                      icon: Icon(Icons.notifications),
-                    ),
-                    CustomButton(
-                      text: 'Repeat',
-                      icon: Icon(Icons.repeat),
+                    IconButton(
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStatePropertyAll(
+                              controller.text.isEmpty
+                                  ? Colors.grey[400]
+                                  : iconColor),
+                          shape: MaterialStatePropertyAll(RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)))),
+                      onPressed: controller.text.isEmpty
+                          ? null
+                          : () {
+                              listBloc.add(AddTask(task: TaskModel(
+                                  task: controller.text,
+                                  isChecked: false,
+                                  isImportant: value == DrawerOptions.important
+                                      ? true
+                                      : false,
+                                  category: value == DrawerOptions.important
+                                      ? 'Tasks'
+                                      : category)
+                              ));
+
+                              controller.clear();
+                              scrollController.animateTo(
+                                  0.0,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeIn
+                              );
+                            },
+                      icon: const Icon(
+                        Icons.arrow_upward,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
-                )
-            ],
+                ),
+                if (controller.text.isNotEmpty)
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      CustomButton(
+                        text: 'Set Due Date',
+                        icon: Icon(Icons.calendar_month),
+                      ),
+                      CustomButton(
+                        text: 'Remind me',
+                        icon: Icon(Icons.notifications),
+                      ),
+                      CustomButton(
+                        text: 'Repeat',
+                        icon: Icon(Icons.repeat),
+                      ),
+                    ],
+                  )
+              ],
+            ),
           ),
         ),
       ),

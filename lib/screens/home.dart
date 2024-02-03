@@ -42,6 +42,7 @@ class _HomeState extends State<Home> {
     _controller = TextEditingController();
     _controller.addListener(() => setState(() {}));
     _focusNode = FocusNode();
+    _focusNode.addListener(() => setState(() {}));
     _editingController = TextEditingController();
     _scrollController = ScrollController();
   }
