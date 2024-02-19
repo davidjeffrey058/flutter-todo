@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:todo/models/task_model.dart';
 
-import '../screens/home.dart';
+import '../home.dart';
 
 Map<String, dynamic> getOptionProperties(DrawerOptions option){
   switch (option){

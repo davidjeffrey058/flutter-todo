@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
-import 'package:todo/components/boxes.dart';
 
 import '../models/task_model.dart';
+import '../screens/components/boxes.dart';
 part 'task_list_event.dart';
 part 'task_list_state.dart';
 

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todo/bloc/task_list_bloc.dart';
 import 'package:todo/screens/home.dart';
-
-import '../models/task_model.dart';
+import '../../models/task_model.dart';
 import 'custom_button.dart';
 
 class AddTaskLayout extends StatelessWidget {
@@ -13,6 +12,7 @@ class AddTaskLayout extends StatelessWidget {
   final TaskListBloc listBloc;
   final String category;
   final ScrollController scrollController;
+  final bool isMobile;
 
   const AddTaskLayout(
       {super.key,
@@ -22,7 +22,8 @@ class AddTaskLayout extends StatelessWidget {
       required this.iconColor,
       required this.listBloc,
       required this.category,
-      required this.scrollController});
+      required this.scrollController,
+      required this.isMobile});
 
   @override
   Widget build(BuildContext context) {
@@ -30,15 +31,15 @@ class AddTaskLayout extends StatelessWidget {
       width: MediaQuery.of(context).size.width,
       child: Container(
         decoration: BoxDecoration(
-          boxShadow:focusNode.hasFocus ? [
-            BoxShadow(
-              color: Colors.grey.shade300.withOpacity(0.5),
-              offset: const Offset(0, -1),
-              blurRadius: 6,
-              spreadRadius: 3
-            )
-          ] : null
-        ),
+            boxShadow: focusNode.hasFocus
+                ? [
+                    BoxShadow(
+                        color: Colors.grey.shade300.withOpacity(0.5),
+                        offset: const Offset(0, -1),
+                        blurRadius: 6,
+                        spreadRadius: 3)
+                  ]
+                : null),
         child: Material(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -58,34 +59,62 @@ class AddTaskLayout extends StatelessWidget {
                         onSaved: (value) {},
                       ),
                     ),
+                    if(controller.text.isNotEmpty && !isMobile)const Row(
+                      children: [
+                        Tooltip(
+                          message: 'Set Due Date',
+                          child: IconButton(
+                            onPressed: null,
+                            icon: Icon(Icons.calendar_month),
+                          ),
+                        ),
+                        SizedBox(width: 10,),
+                        Tooltip(
+                          message: 'Remind me',
+                          child: IconButton(
+                            onPressed: null,
+                            icon: Icon(Icons.notifications),
+                          ),
+                        ),
+                        SizedBox(width: 10,),
+                        Tooltip(
+                          message: 'Repeat',
+                          child: IconButton(
+                            onPressed: null,
+                            icon: Icon(Icons.repeat),
+                          ),
+                        ),
+                        SizedBox(width: 10,),
+                      ],
+                    ),
                     IconButton(
                       style: ButtonStyle(
                           backgroundColor: MaterialStatePropertyAll(
                               controller.text.isEmpty
                                   ? Colors.grey[400]
                                   : iconColor),
-                          shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)))),
+                          shape: MaterialStatePropertyAll(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)))),
                       onPressed: controller.text.isEmpty
                           ? null
                           : () {
-                              listBloc.add(AddTask(task: TaskModel(
-                                  task: controller.text,
-                                  isChecked: false,
-                                  isImportant: value == DrawerOptions.important
-                                      ? true
-                                      : false,
-                                  category: value == DrawerOptions.important
-                                      ? 'Tasks'
-                                      : category)
-                              ));
+                              listBloc.add(AddTask(
+                                  task: TaskModel(
+                                      task: controller.text,
+                                      isChecked: false,
+                                      isImportant:
+                                          value == DrawerOptions.important
+                                              ? true
+                                              : false,
+                                      category: value == DrawerOptions.important
+                                          ? 'Tasks'
+                                          : category)));
 
                               controller.clear();
-                              scrollController.animateTo(
-                                  0.0,
+                              scrollController.animateTo(0.0,
                                   duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeIn
-                              );
+                                  curve: Curves.easeIn);
                             },
                       icon: const Icon(
                         Icons.arrow_upward,
@@ -94,7 +123,7 @@ class AddTaskLayout extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (controller.text.isNotEmpty)
+                if (controller.text.isNotEmpty && isMobile)
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
