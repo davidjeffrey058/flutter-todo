@@ -62,7 +62,6 @@ class _HomeState extends State<Home> {
           builder: (context, constraint) {
             if (constraint.maxWidth <= 992) {
               return HomeLayout(
-                showDrawer: true,
                 gestureDetectorOnTap: () => _focusNode.unfocus(),
                 value: value,
                 scrollController: _scrollController,
@@ -93,7 +92,6 @@ class _HomeState extends State<Home> {
                     ),
                     Expanded(
                       child: HomeLayout(
-                        showDrawer: false,
                         gestureDetectorOnTap: () => _focusNode.unfocus(),
                         value: value,
                         scrollController: _scrollController,
@@ -102,7 +100,6 @@ class _HomeState extends State<Home> {
                         controller: _controller,
                         focusNode: _focusNode,
                         emptyMessageWidth: 300,
-                        isMobile: false,
                       )
                     )
                   ],

@@ -33,6 +33,7 @@ dependencies:
   hive:
   hive_flutter:
   flutter_bloc:
+  bloc:
   http: 
 
 

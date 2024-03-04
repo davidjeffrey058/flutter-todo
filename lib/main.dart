@@ -5,6 +5,7 @@ import 'package:todo/Cubit/drawer_cubit.dart';
 import 'package:todo/bloc/task_list_bloc.dart';
 import 'package:todo/screens/components/boxes.dart';
 import 'package:todo/screens/home.dart';
+import 'package:todo/theme.dart';
 import 'models/task_model.dart';
 
 Future<void> main() async{
@@ -21,15 +22,9 @@ Future<void> main() async{
     ],
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent,
-          titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
-          iconTheme: IconThemeData(color: Colors.white)
-        )
-      ),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.light,
       home: const Home(),
     ),
   ));

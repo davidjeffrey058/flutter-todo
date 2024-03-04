@@ -12,7 +12,7 @@ class AddTaskLayout extends StatelessWidget {
   final TaskListBloc listBloc;
   final String category;
   final ScrollController scrollController;
-  final bool isMobile;
+  // final bool isMobile;
 
   const AddTaskLayout(
       {super.key,
@@ -23,18 +23,21 @@ class AddTaskLayout extends StatelessWidget {
       required this.listBloc,
       required this.category,
       required this.scrollController,
-      required this.isMobile});
+      });
 
   @override
   Widget build(BuildContext context) {
+
+    final maxWidth = MediaQuery.of(context).size.width;
+
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: Container(
         decoration: BoxDecoration(
-            boxShadow: focusNode.hasFocus
+            boxShadow: focusNode.hasFocus && maxWidth <= 992
                 ? [
                     BoxShadow(
-                        color: Colors.grey.shade300.withOpacity(0.5),
+                        color: Colors.grey.withOpacity(0.5),
                         offset: const Offset(0, -1),
                         blurRadius: 6,
                         spreadRadius: 3)
@@ -59,7 +62,7 @@ class AddTaskLayout extends StatelessWidget {
                         onSaved: (value) {},
                       ),
                     ),
-                    if(controller.text.isNotEmpty && !isMobile)const Row(
+                    if(controller.text.isNotEmpty && maxWidth >= 992)const Row(
                       children: [
                         Tooltip(
                           message: 'Set Due Date',
@@ -123,7 +126,7 @@ class AddTaskLayout extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (controller.text.isNotEmpty && isMobile)
+                if (controller.text.isNotEmpty && maxWidth <= 992)
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
