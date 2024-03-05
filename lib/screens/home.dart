@@ -81,11 +81,6 @@ class _HomeState extends State<Home> {
                         child: DrawerLayout(
                           options: options,
                           drawerOption: value,
-                          lengthList: [
-                            myDayListLength,
-                            taskListLength,
-                            importantListLength
-                          ],
                           popDrawer: false,
                         ),
                       ),
@@ -99,7 +94,6 @@ class _HomeState extends State<Home> {
                         editingController: _editingController,
                         controller: _controller,
                         focusNode: _focusNode,
-                        emptyMessageWidth: 300,
                       )
                     )
                   ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:todo/bloc/task_list_bloc.dart';
 import '../../Cubit/drawer_cubit.dart';
 import '../home.dart';
 import 'methods.dart';
@@ -8,15 +8,14 @@ import 'methods.dart';
 class DrawerLayout extends StatelessWidget {
   final DrawerOptions drawerOption;
   final List<DrawerOptions> options;
-  final List<int> lengthList;
   final bool popDrawer;
 
-  const DrawerLayout(
-      {super.key,
-      required this.options,
-      required this.drawerOption,
-      required this.lengthList,
-      this.popDrawer = true});
+  const DrawerLayout({
+    super.key,
+    required this.options,
+    required this.drawerOption,
+    this.popDrawer = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +64,7 @@ class DrawerLayout extends StatelessWidget {
             ListView(
               shrinkWrap: true,
               children: options.map((option) {
-                int index = options.indexOf(option);
+                //int index = options.indexOf(option);
                 return Container(
                   margin: const EdgeInsets.only(bottom: 5),
                   child: Material(
@@ -77,7 +76,7 @@ class DrawerLayout extends StatelessWidget {
                       onTap: () {
                         BlocProvider.of<DrawerCubit>(context)
                             .selectedOption(option);
-                        if(popDrawer)Navigator.of(context).pop();
+                        if (popDrawer) Navigator.of(context).pop();
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -95,11 +94,22 @@ class DrawerLayout extends StatelessWidget {
                             const Expanded(
                               child: SizedBox(),
                             ),
-                            if (lengthList[index] > 0)
-                              Text(
-                                '${lengthList[index]}',
-                                style: const TextStyle(color: Colors.grey),
-                              )
+                            BlocBuilder<TaskListBloc, TaskListState>(
+                              bloc: TaskListBloc(),
+                              builder: (context, state) {
+                                int categoryTaskListLength =
+                                    categoryList(option, state.tasks).length +
+                                        categoryList(option, state.tasks,
+                                                isEmptyList: true)
+                                            .length;
+                                return Text(
+                                  categoryTaskListLength <= 0
+                                      ? ''
+                                      : '$categoryTaskListLength',
+                                  style: const TextStyle(color: Colors.grey),
+                                );
+                              },
+                            )
                           ],
                         ),
                       ),

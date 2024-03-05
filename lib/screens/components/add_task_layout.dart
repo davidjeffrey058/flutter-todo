@@ -12,23 +12,22 @@ class AddTaskLayout extends StatelessWidget {
   final TaskListBloc listBloc;
   final String category;
   final ScrollController scrollController;
-  // final bool isMobile;
 
-  const AddTaskLayout(
-      {super.key,
-      required this.focusNode,
-      required this.controller,
-      required this.value,
-      required this.iconColor,
-      required this.listBloc,
-      required this.category,
-      required this.scrollController,
-      });
+  const AddTaskLayout({
+    super.key,
+    required this.focusNode,
+    required this.controller,
+    required this.value,
+    required this.iconColor,
+    required this.listBloc,
+    required this.category,
+    required this.scrollController,
+  });
 
   @override
   Widget build(BuildContext context) {
-
     final maxWidth = MediaQuery.of(context).size.width;
+    final maxHeight = MediaQuery.of(context).size.height;
 
     return SizedBox(
       width: MediaQuery.of(context).size.width,
@@ -59,37 +58,44 @@ class AddTaskLayout extends StatelessWidget {
                             hintText: 'Add a task',
                             border: InputBorder.none),
                         controller: controller,
-                        onSaved: (value) {},
+                        onFieldSubmitted: maxWidth >= 992 ? (value) => onFieldSubmitted() : null,
                       ),
                     ),
-                    if(controller.text.isNotEmpty && maxWidth >= 992)const Row(
-                      children: [
-                        Tooltip(
-                          message: 'Set Due Date',
-                          child: IconButton(
-                            onPressed: null,
-                            icon: Icon(Icons.calendar_month),
+                    if (controller.text.isNotEmpty && maxWidth >= 992)
+                      const Row(
+                        children: [
+                          Tooltip(
+                            message: 'Set Due Date',
+                            child: IconButton(
+                              onPressed: null,
+                              icon: Icon(Icons.calendar_month),
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 10,),
-                        Tooltip(
-                          message: 'Remind me',
-                          child: IconButton(
-                            onPressed: null,
-                            icon: Icon(Icons.notifications),
+                          SizedBox(
+                            width: 10,
                           ),
-                        ),
-                        SizedBox(width: 10,),
-                        Tooltip(
-                          message: 'Repeat',
-                          child: IconButton(
-                            onPressed: null,
-                            icon: Icon(Icons.repeat),
+                          Tooltip(
+                            message: 'Remind me',
+                            child: IconButton(
+                              onPressed: null,
+                              icon: Icon(Icons.notifications),
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 10,),
-                      ],
-                    ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Tooltip(
+                            message: 'Repeat',
+                            child: IconButton(
+                              onPressed: null,
+                              icon: Icon(Icons.repeat),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                        ],
+                      ),
                     IconButton(
                       style: ButtonStyle(
                           backgroundColor: MaterialStatePropertyAll(
@@ -101,24 +107,7 @@ class AddTaskLayout extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(10)))),
                       onPressed: controller.text.isEmpty
                           ? null
-                          : () {
-                              listBloc.add(AddTask(
-                                  task: TaskModel(
-                                      task: controller.text,
-                                      isChecked: false,
-                                      isImportant:
-                                          value == DrawerOptions.important
-                                              ? true
-                                              : false,
-                                      category: value == DrawerOptions.important
-                                          ? 'Tasks'
-                                          : category)));
-
-                              controller.clear();
-                              scrollController.animateTo(0.0,
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeIn);
-                            },
+                          : () => onFieldSubmitted(),
                       icon: const Icon(
                         Icons.arrow_upward,
                         color: Colors.white,
@@ -126,7 +115,7 @@ class AddTaskLayout extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (controller.text.isNotEmpty && maxWidth <= 992)
+                if (controller.text.isNotEmpty && maxWidth <= 992 )
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -149,6 +138,27 @@ class AddTaskLayout extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  onFieldSubmitted() {
+    listBloc.add(AddTask(
+        task: TaskModel(
+            task: controller.text,
+            isChecked: false,
+            isImportant:
+            value == DrawerOptions.important
+                ? true
+                : false,
+            category: value == DrawerOptions.important
+                ? 'Tasks'
+                : category)));
+
+    controller.clear();
+    scrollController.animateTo(
+      0.0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeIn,
     );
   }
 }

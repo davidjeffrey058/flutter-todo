@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo/screens/home.dart';
-
 import '../../bloc/task_list_bloc.dart';
 import '../../models/task_model.dart';
 import '../components/add_task_layout.dart';
@@ -13,7 +12,6 @@ import '../components/task_container.dart';
 import '../test_page.dart';
 
 class HomeLayout extends StatelessWidget {
-  final double? emptyMessageWidth;
   final void Function()? gestureDetectorOnTap;
   final DrawerOptions value;
   final ScrollController scrollController;
@@ -21,8 +19,6 @@ class HomeLayout extends StatelessWidget {
   final TextEditingController editingController;
   final TextEditingController controller;
   final FocusNode focusNode;
-  // final bool showDrawer;
-  // final bool isMobile;
 
   const HomeLayout({
     super.key,
@@ -33,169 +29,96 @@ class HomeLayout extends StatelessWidget {
     required this.editingController,
     required this.controller,
     required this.focusNode,
-    this.emptyMessageWidth,
   });
 
   @override
   Widget build(BuildContext context) {
-
     final maxWidth = MediaQuery.of(context).size.width;
-    final maxHeight = MediaQuery.of(context).size.height;
+    // final maxHeight = MediaQuery.of(context).size.height;
 
     return GestureDetector(
         onTap: gestureDetectorOnTap,
         child: Container(
           decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage(
-                      'images/${getOptionProperties(value)['backgroundImage']}'),
-                  fit: BoxFit.cover)),
+            image: DecorationImage(
+                image: AssetImage(
+                    'images/${getOptionProperties(value)['backgroundImage']}'),
+                fit: BoxFit.cover),
+          ),
           child: Scaffold(
             backgroundColor: Colors.transparent,
             appBar: myAppBar(),
             body: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Category title
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: CategoryTitle(
                     properties: getOptionProperties(value),
                   ),
                 ),
+
+                // List of Tasks section
                 BlocBuilder<TaskListBloc, TaskListState>(
                   builder: (context, state) {
-                    if (categoryList(value, state.tasks).isEmpty) {
+                    final emptyList = categoryList(value, state.tasks, isEmptyList: true);
+
+                    if (categoryList(value, state.tasks).isEmpty &&
+                        emptyList.isEmpty) {
                       return EmptyMessageWidget(
-                          emptyMessageWidth: emptyMessageWidth,
                           imageName:
                               getOptionProperties(value)['emptyMessageImage'],
                           message: getOptionProperties(value)['emptyMessage']);
                     } else {
                       return Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: SingleChildScrollView(
                             controller: scrollController,
-                            shrinkWrap: true,
-                            itemCount: categoryList(value, state.tasks).length,
-                            itemBuilder: (context, index) {
-                              Map task =
-                                  categoryList(value, state.tasks)[index];
+                            child: Column(
+                              children: [
+                                taskListLayout(state, false),
+                                const SizedBox(
+                                  height: 10,
+                                ),
 
-                              //Gets number of tasks per category
-                              myDayListLength = categoryList(DrawerOptions.myDay, state.tasks).length;
-                              taskListLength = categoryList(DrawerOptions.tasks, state.tasks).length;
-                              importantListLength = categoryList(DrawerOptions.important, state.tasks).length;
-
-                              return Column(
-                                children: [
-                                  if (index == 0)
-                                    const SizedBox(
-                                      height: 5,
+                                // Task completed section
+                                if(emptyList.isNotEmpty)Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Container(
+                                    width: 140,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 5,
                                     ),
-                                  TaskContainer(
-                                    dismissibleKey: ValueKey(task['key']),
-                                    item: task,
-                                    index: index,
-                                    checkedOnPressed: () {
-                                      listBloc.add(UpdateTask(
-                                          task: TaskModel(
-                                              task: task['task'],
-                                              isChecked: !task['isChecked'],
-                                              isImportant: task['isImportant'],
-                                              category: task['category']),
-                                          key: task['key']));
-                                    },
-                                    importantOnPressed: () {
-                                      listBloc.add(UpdateTask(
-                                          task: TaskModel(
-                                              task: task['task'],
-                                              isChecked: task['isChecked'],
-                                              isImportant: !task['isImportant'],
-                                              category: task['category']),
-                                          key: task['key']));
-                                    },
-                                    onDismissed: (DismissDirection direction) {
-                                      if (direction ==
-                                          DismissDirection.endToStart) {
-                                        listBloc
-                                            .add(DeleteTask(key: task['key']));
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(const SnackBar(
-                                          content: Text('Task Deleted'),
-                                          duration: Duration(seconds: 1),
-                                        ));
-                                      }
-                                    },
-                                    confirmDismiss:
-                                        (DismissDirection direction) async {
-                                      if (direction ==
-                                          DismissDirection.startToEnd) {
-                                        editingController.text = task['task'];
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                title: const Text('Edit task'),
-                                                content: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    TextFormField(
-                                                      minLines: 2,
-                                                      maxLines: 3,
-                                                      controller:
-                                                          editingController,
-                                                      autofocus: true,
-                                                    )
-                                                  ],
-                                                ),
-                                                actions: [
-                                                  OutlinedButton(
-                                                      onPressed: () {
-                                                        listBloc.add(UpdateTask(
-                                                          task: TaskModel(
-                                                            task:
-                                                                editingController
-                                                                    .text,
-                                                            isChecked: task[
-                                                                'isChecked'],
-                                                            isImportant: task[
-                                                                'isImportant'],
-                                                            category: task[
-                                                                'category'],
-                                                          ),
-                                                          key: task['key'],
-                                                        ));
-
-                                                        Navigator.pop(context);
-                                                      },
-                                                      child:
-                                                          const Text('Save')),
-                                                  OutlinedButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              context),
-                                                      child:
-                                                          const Text('Cancel'))
-                                                ],
-                                              );
-                                            });
-                                        return false;
-                                      }
-                                      if (direction ==
-                                          DismissDirection.endToStart) {
-                                        return true;
-                                      }
-                                      return null;
-                                    },
+                                    decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.4),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'Completed  (${emptyList.length})',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        const Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: Colors.white,
+                                        )
+                                      ],
+                                    ),
                                   ),
-                                  const SizedBox(
-                                    height: 5,
-                                  )
-                                ],
-                              );
-                            },
+                                ),
+                                if(emptyList.isNotEmpty)SizedBox(
+                                  child: taskListLayout(state, true),
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -223,11 +146,6 @@ class HomeLayout extends StatelessWidget {
                     child: DrawerLayout(
                       options: options,
                       drawerOption: value,
-                      lengthList: [
-                        myDayListLength,
-                        taskListLength,
-                        importantListLength
-                      ],
                     ),
                   )
                 : null,
@@ -264,6 +182,110 @@ class HomeLayout extends StatelessWidget {
           },
         )
       ],
+    );
+  }
+
+  taskListLayout(TaskListState state, bool isEmptyList) {
+    return ListView.builder(
+      primary: false,
+      shrinkWrap: true,
+      itemCount:
+          categoryList(value, state.tasks, isEmptyList: isEmptyList).length,
+      itemBuilder: (context, index) {
+        Map task =
+            categoryList(value, state.tasks, isEmptyList: isEmptyList)[index];
+        return Column(
+          children: [
+            if (index == 0)
+              const SizedBox(
+                height: 5,
+              ),
+            TaskContainer(
+              dismissibleKey: ValueKey(task['key']),
+              item: task,
+              index: index,
+              checkedOnPressed: () {
+                listBloc.add(UpdateTask(
+                    task: TaskModel(
+                        task: task['task'],
+                        isChecked: !task['isChecked'],
+                        isImportant: task['isImportant'],
+                        category: task['category']),
+                    key: task['key']));
+              },
+              importantOnPressed: () {
+                listBloc.add(UpdateTask(
+                    task: TaskModel(
+                        task: task['task'],
+                        isChecked: task['isChecked'],
+                        isImportant: !task['isImportant'],
+                        category: task['category']),
+                    key: task['key']));
+              },
+              onDismissed: (DismissDirection direction) {
+                if (direction == DismissDirection.endToStart) {
+                  listBloc.add(DeleteTask(key: task['key']));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Task Deleted'),
+                    duration: Duration(seconds: 1),
+                  ));
+                }
+              },
+              confirmDismiss: (DismissDirection direction) async {
+                if (direction == DismissDirection.startToEnd) {
+                  editingController.text = task['task'];
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Edit task'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextFormField(
+                                minLines: 2,
+                                maxLines: 3,
+                                controller: editingController,
+                                autofocus: true,
+                              )
+                            ],
+                          ),
+                          actions: [
+                            OutlinedButton(
+                                onPressed: () {
+                                  listBloc.add(UpdateTask(
+                                    task: TaskModel(
+                                      task: editingController.text,
+                                      isChecked: task['isChecked'],
+                                      isImportant: task['isImportant'],
+                                      category: task['category'],
+                                    ),
+                                    key: task['key'],
+                                  ));
+
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Save')),
+                            OutlinedButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'))
+                          ],
+                        );
+                      });
+                  return false;
+                }
+                if (direction == DismissDirection.endToStart) {
+                  return true;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(
+              height: 5,
+            )
+          ],
+        );
+      },
     );
   }
 }

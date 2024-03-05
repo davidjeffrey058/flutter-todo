@@ -3,22 +3,23 @@ import 'package:flutter/material.dart';
 class EmptyMessageWidget extends StatelessWidget {
   final String imageName;
   final String message;
-  final double? emptyMessageWidth;
 
-  const EmptyMessageWidget(
-      {super.key,
-      required this.imageName,
-      required this.message,
-      this.emptyMessageWidth});
+  const EmptyMessageWidget({
+    super.key,
+    required this.imageName,
+    required this.message,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final maxWidth = MediaQuery.of(context).size.width;
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: Colors.black.withOpacity(0.5),
       ),
-      width:emptyMessageWidth ?? MediaQuery.of(context).size.width * 0.6,
+      width: maxWidth <= 992 ? MediaQuery.of(context).size.width * 0.6 : 300,
       padding: const EdgeInsets.all(30),
       child: Column(
         mainAxisSize: MainAxisSize.min,

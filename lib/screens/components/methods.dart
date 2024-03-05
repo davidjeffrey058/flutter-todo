@@ -36,7 +36,7 @@ Map<String, dynamic> getOptionProperties(DrawerOptions option){
   }
 }
 
-List<Map> categoryList(DrawerOptions options, Box taskBox){
+List<Map> categoryList(DrawerOptions options, Box taskBox, {bool isEmptyList = false}){
   late List<Map> items;
 
   switch (options){
@@ -44,7 +44,8 @@ List<Map> categoryList(DrawerOptions options, Box taskBox){
       items = [];
       for(int i = taskBox.length - 1; i >= 0; i--){
         TaskModel value = taskBox.getAt(i);
-        if(value.category == 'My day'){
+        bool checkedValue = isEmptyList ? value.isChecked : !value.isChecked;
+        if(value.category == 'My day' && checkedValue){
           items.add({
             'task': value.task,
             'key' : taskBox.keyAt(i),
@@ -60,7 +61,8 @@ List<Map> categoryList(DrawerOptions options, Box taskBox){
       items = [];
       for(int i = taskBox.length - 1; i >= 0; i--){
         TaskModel value = taskBox.getAt(i);
-        if(value.category == 'Tasks'){
+        bool checkedValue = isEmptyList ? value.isChecked : !value.isChecked;
+        if(value.category == 'Tasks' && checkedValue){
           items.add({
             'task': value.task,
             'key' : taskBox.keyAt(i),
@@ -76,7 +78,8 @@ List<Map> categoryList(DrawerOptions options, Box taskBox){
       items = [];
       for(int i = taskBox.length - 1; i >= 0; i--){
         TaskModel value = taskBox.getAt(i);
-        if(value.isImportant){
+        bool checkedValue = isEmptyList ? value.isChecked : !value.isChecked;
+        if(value.isImportant && checkedValue){
           items.add({
             'task': value.task,
             'key' : taskBox.keyAt(i),
@@ -89,4 +92,5 @@ List<Map> categoryList(DrawerOptions options, Box taskBox){
       return items;
   }
 }
+
 
