@@ -38,7 +38,9 @@ class HomeLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final maxWidth = MediaQuery.of(context).size.width;
+    final maxHeight = MediaQuery.of(context).size.height;
 
     return GestureDetector(
         onTap: gestureDetectorOnTap,
@@ -81,15 +83,9 @@ class HomeLayout extends StatelessWidget {
                                   categoryList(value, state.tasks)[index];
 
                               //Gets number of tasks per category
-                              myDayListLength =
-                                  categoryList(DrawerOptions.myDay, state.tasks)
-                                      .length;
-                              taskListLength =
-                                  categoryList(DrawerOptions.tasks, state.tasks)
-                                      .length;
-                              importantListLength = categoryList(
-                                      DrawerOptions.important, state.tasks)
-                                  .length;
+                              myDayListLength = categoryList(DrawerOptions.myDay, state.tasks).length;
+                              taskListLength = categoryList(DrawerOptions.tasks, state.tasks).length;
+                              importantListLength = categoryList(DrawerOptions.important, state.tasks).length;
 
                               return Column(
                                 children: [
@@ -208,9 +204,8 @@ class HomeLayout extends StatelessWidget {
                 ),
 
                 //Add task section
-                Opacity(
-                  // duration: const Duration(milliseconds: 200),
-                  opacity: maxWidth <= 992 && !focusNode.hasFocus ? 0.0 : 1,
+                SizedBox(
+                  height: maxWidth <= 992 && !focusNode.hasFocus ? 0 : null,
                   child: AddTaskLayout(
                     scrollController: scrollController,
                     iconColor: getOptionProperties(value)['iconColor'],

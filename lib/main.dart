@@ -21,6 +21,7 @@ Future<void> main() async{
       BlocProvider<DrawerCubit>(create: (context) => DrawerCubit()),
     ],
     child: MaterialApp(
+      title: 'Sweet Todo',
       debugShowCheckedModeBanner: false,
       theme: lightTheme,
       darkTheme: darkTheme,
