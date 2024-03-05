@@ -27,7 +27,7 @@ class AddTaskLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final maxWidth = MediaQuery.of(context).size.width;
-    final maxHeight = MediaQuery.of(context).size.height;
+    // final maxHeight = MediaQuery.of(context).size.height;
 
     return SizedBox(
       width: MediaQuery.of(context).size.width,
