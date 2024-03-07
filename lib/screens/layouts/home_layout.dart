@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todo/bloc/ThemeBloc/theme_bloc.dart';
 import 'package:todo/screens/home.dart';
 import '../../bloc/task_list_bloc.dart';
 import '../../models/task_model.dart';
@@ -62,7 +63,8 @@ class HomeLayout extends StatelessWidget {
                 // List of Tasks section
                 BlocBuilder<TaskListBloc, TaskListState>(
                   builder: (context, state) {
-                    final emptyList = categoryList(value, state.tasks, isEmptyList: true);
+                    final emptyList =
+                        categoryList(value, state.tasks, isEmptyList: true);
 
                     if (categoryList(value, state.tasks).isEmpty &&
                         emptyList.isEmpty) {
@@ -84,39 +86,41 @@ class HomeLayout extends StatelessWidget {
                                 ),
 
                                 // Task completed section
-                                if(emptyList.isNotEmpty)Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Container(
-                                    width: 140,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.4),
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          'Completed  (${emptyList.length})',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
+                                if (emptyList.isNotEmpty)
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Container(
+                                      width: 140,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.4),
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'Completed  (${emptyList.length})',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                        ),
-                                        const Spacer(),
-                                        const Icon(
-                                          Icons.keyboard_arrow_down_rounded,
-                                          color: Colors.white,
-                                        )
-                                      ],
+                                          const Spacer(),
+                                          const Icon(
+                                            Icons.keyboard_arrow_down_rounded,
+                                            color: Colors.white,
+                                          )
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                if(emptyList.isNotEmpty)SizedBox(
-                                  child: taskListLayout(state, true),
-                                )
+                                if (emptyList.isNotEmpty)
+                                  SizedBox(
+                                    child: taskListLayout(state, true),
+                                  )
                               ],
                             ),
                           ),
@@ -177,7 +181,20 @@ class HomeLayout extends StatelessWidget {
                 onTap: () => Navigator.push(context,
                     MaterialPageRoute(builder: (context) => const TestPage())),
               ),
-              const PopupMenuItem(child: Text('Item two')),
+              PopupMenuItem(
+                child: SwitchListTile(
+                  title: const Text('Dark mode'),
+                  value: context.read<ThemeBloc>().state == ThemeMode.dark,
+                  onChanged: (value) {
+                    Navigator.pop(context);
+                    if(!value){
+                      context.read<ThemeBloc>().add(LightModeTheme());
+                    } else {
+                      context.read<ThemeBloc>().add(DarkModeTheme());
+                    }
+                  },
+                ),
+              ),
             ];
           },
         )

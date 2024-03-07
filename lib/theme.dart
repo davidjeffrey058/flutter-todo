@@ -14,5 +14,10 @@ final lightTheme = ThemeData(
 final darkTheme = ThemeData(
   brightness: Brightness.dark,
   useMaterial3: true,
-  colorScheme: const ColorScheme.dark(primary: Colors.blue)
+  colorScheme: const ColorScheme.dark(primary: Colors.blue),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Colors.transparent,
+    titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+    iconTheme: IconThemeData(color: Colors.white),
+  ),
 );

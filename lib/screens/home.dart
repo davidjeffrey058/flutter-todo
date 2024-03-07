@@ -50,6 +50,7 @@ class _HomeState extends State<Home> {
     _focusNode.dispose();
     _editingController.dispose();
     _scrollController.dispose();
+    TaskListBloc().close();
   }
 
   @override
