@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo/bloc/ThemeBloc/theme_bloc.dart';
+import 'package:todo/screens/components/boxes.dart';
 import 'package:todo/screens/home.dart';
 import '../../bloc/task_list_bloc.dart';
 import '../../models/task_model.dart';
@@ -34,8 +35,12 @@ class HomeLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final maxWidth = MediaQuery.of(context).size.width;
     // final maxHeight = MediaQuery.of(context).size.height;
+    final navigator = Navigator.of(context);
+    final readThemeBloc = context.read<ThemeBloc>();
+
 
     return GestureDetector(
         onTap: gestureDetectorOnTap,
@@ -48,7 +53,39 @@ class HomeLayout extends StatelessWidget {
           ),
           child: Scaffold(
             backgroundColor: Colors.transparent,
-            appBar: myAppBar(),
+            appBar: AppBar(
+              centerTitle: true,
+              title: const Text('Todo'),
+              actions: [
+                PopupMenuButton(
+                  itemBuilder: (context) {
+                    return [
+                      PopupMenuItem(
+                        child: const Text('Item one'),
+                        onTap: () => Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => const TestPage())),
+                      ),
+                      PopupMenuItem(
+                        child: SwitchListTile(
+                          title: const Text('Dark mode'),
+                          value: context.read<ThemeBloc>().state == ThemeMode.dark,
+                          onChanged: (value) async {
+                            await configBox.put('isDark', value);
+                            navigator.pop();
+                            if(!value){
+                              readThemeBloc.add(LightModeTheme());
+                            } else {
+                              readThemeBloc.add(DarkModeTheme());
+                            }
+
+                          },
+                        ),
+                      ),
+                    ];
+                  },
+                )
+              ],
+            ),
             body: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -168,39 +205,7 @@ class HomeLayout extends StatelessWidget {
         ));
   }
 
-  PreferredSizeWidget myAppBar() {
-    return AppBar(
-      centerTitle: true,
-      title: const Text('Todo'),
-      actions: [
-        PopupMenuButton(
-          itemBuilder: (context) {
-            return [
-              PopupMenuItem(
-                child: const Text('Item one'),
-                onTap: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const TestPage())),
-              ),
-              PopupMenuItem(
-                child: SwitchListTile(
-                  title: const Text('Dark mode'),
-                  value: context.read<ThemeBloc>().state == ThemeMode.dark,
-                  onChanged: (value) {
-                    Navigator.pop(context);
-                    if(!value){
-                      context.read<ThemeBloc>().add(LightModeTheme());
-                    } else {
-                      context.read<ThemeBloc>().add(DarkModeTheme());
-                    }
-                  },
-                ),
-              ),
-            ];
-          },
-        )
-      ],
-    );
-  }
+
 
   taskListLayout(TaskListState state, bool isEmptyList) {
     return ListView.builder(

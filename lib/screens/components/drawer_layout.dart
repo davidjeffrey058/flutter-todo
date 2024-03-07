@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo/bloc/task_list_bloc.dart';
+import 'package:todo/screens/components/boxes.dart';
 import '../../Cubit/drawer_cubit.dart';
 import '../home.dart';
 import 'methods.dart';
@@ -19,6 +20,10 @@ class DrawerLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final drawerCubit = BlocProvider.of<DrawerCubit>(context);
+    final navigator = Navigator.of(context);
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -73,10 +78,19 @@ class DrawerLayout extends StatelessWidget {
                             .withOpacity(0.1)
                         : Colors.transparent,
                     child: InkWell(
-                      onTap: () {
-                        BlocProvider.of<DrawerCubit>(context)
-                            .selectedOption(option);
-                        if (popDrawer) Navigator.of(context).pop();
+                      onTap: () async {
+                        int drawerIndex = 0;
+                        switch(option){
+                          case DrawerOptions.myDay:
+                            drawerIndex = 1;
+                          case DrawerOptions.tasks:
+                            drawerIndex = 2;
+                          case DrawerOptions.important:
+                            drawerIndex = 3;
+                        }
+                        await configBox.put('drawerValue', drawerIndex);
+                        drawerCubit.selectedOption(option);
+                        if (popDrawer) navigator.pop();
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
