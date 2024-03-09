@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todo/bloc/SelectionBloc/selection_bloc.dart';
 import 'package:todo/bloc/ThemeBloc/theme_bloc.dart';
 import 'package:todo/screens/components/boxes.dart';
 import 'package:todo/screens/home.dart';
@@ -58,6 +59,7 @@ class _HomeLayoutState extends State<HomeLayout> with SingleTickerProviderStateM
     _scrollController.dispose();
     _animationController.dispose();
     TaskListBloc().close();
+    SelectionBloc().close();
   }
 
   @override
@@ -67,194 +69,201 @@ class _HomeLayoutState extends State<HomeLayout> with SingleTickerProviderStateM
     final navigator = Navigator.of(context);
     final readThemeBloc = context.read<ThemeBloc>();
     TaskListBloc listBloc = BlocProvider.of<TaskListBloc>(context);
+    final theme = Theme.of(context);
+    final readSelectionBloc = context.read<SelectionBloc>();
 
-    return GestureDetector(
-        onTap: () => _focusNode.unfocus(),
-        child: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage(
-                    'images/${getOptionProperties(widget.value)['backgroundImage']}'),
-                fit: BoxFit.cover),
-          ),
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            appBar: AppBar(
-              centerTitle: true,
-              title: const Text('Todo'),
-              actions: [
-                PopupMenuButton(
-                  itemBuilder: (context) {
-                    return [
-                      PopupMenuItem(
-                        child: const Text('Item one'),
-                        onTap: () => Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => const TestPage())),
-                      ),
-                      PopupMenuItem(
-                        child: SwitchListTile(
-                          title: const Text('Dark mode'),
-                          value: context.read<ThemeBloc>().state == ThemeMode.dark,
-                          onChanged: (value) async {
-                            await configBox.put('isDark', value);
-                            navigator.pop();
-                            if(!value){
-                              readThemeBloc.add(LightModeTheme());
-                            } else {
-                              readThemeBloc.add(DarkModeTheme());
-                            }
+    return BlocBuilder<SelectionBloc, SelectionState>(
+      bloc: SelectionBloc(),
+      builder: (context, state) {
+        return GestureDetector(
+            onTap: () => _focusNode.unfocus(),
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage(
+                        'images/${getOptionProperties(widget.value)['backgroundImage']}'),
+                    fit: BoxFit.cover),
+              ),
+              child: Scaffold(
+                backgroundColor: Colors.transparent,
+                appBar: AppBar(
+                  centerTitle: state.selectedList.isEmpty ? true : false,
+                  title: const Text('Todo'),
+                  actions: [
+                    PopupMenuButton(
+                      itemBuilder: (context) {
+                        return [
+                          PopupMenuItem(
+                            child: const Text('Item one'),
+                            onTap: () => Navigator.push(context,
+                                MaterialPageRoute(builder: (context) => const TestPage())),
+                          ),
+                          PopupMenuItem(
+                            child: SwitchListTile(
+                              title: const Text('Dark mode'),
+                              value: context.read<ThemeBloc>().state == ThemeMode.dark,
+                              onChanged: (value) async {
+                                await configBox.put('isDark', value);
+                                navigator.pop();
+                                if(!value){
+                                  readThemeBloc.add(LightModeTheme());
+                                } else {
+                                  readThemeBloc.add(DarkModeTheme());
+                                }
 
-                          },
-                        ),
-                      ),
-                    ];
-                  },
-                )
-              ],
-            ),
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Category title
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: CategoryTitle(
-                    properties: getOptionProperties(widget.value),
-                  ),
-                ),
-
-                // List of Tasks section
-                BlocBuilder<TaskListBloc, TaskListState>(
-                  builder: (context, state) {
-                    final emptyList =
-                        categoryList(widget.value, state.tasks, isEmptyList: true);
-
-                    if (categoryList(widget.value, state.tasks).isEmpty &&
-                        emptyList.isEmpty) {
-                      return EmptyMessageWidget(
-                          imageName:
-                              getOptionProperties(widget.value)['emptyMessageImage'],
-                          message: getOptionProperties(widget.value)['emptyMessage']);
-                    } else {
-                      return Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: SingleChildScrollView(
-                            controller: _scrollController,
-                            child: Column(
-                              children: [
-                                taskListLayout(state, false, listBloc),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-
-                                // Task completed section
-                                if (emptyList.isNotEmpty)AnimatedBuilder(
-                                  animation: animation,
-                                  builder: (context, child) {
-                                    return Column(
-                                      children: [
-                                        Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: InkWell(
-                                            onTap: () {
-                                              if(!isOpened){
-                                                _animationController.forward();
-                                              } else{
-                                                _animationController.reverse();
-                                              }
-                                              setState(() => isOpened = !isOpened);
-                                            },
-                                            child: Container(
-                                              width: 140,
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 10,
-                                                vertical: 5,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                  color: Colors.black.withOpacity(0.4),
-                                                  borderRadius:
-                                                  BorderRadius.circular(10)),
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    'Completed  (${emptyList.length})',
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  const Spacer(),
-                                                  Transform(
-                                                    alignment: Alignment.center,
-                                                    transform: Matrix4.rotationZ((_animationController.value * 90) * (pi.pi / 180)),
-                                                    child: const Icon(
-                                                      Icons.keyboard_arrow_right,
-                                                      color: Colors.white,
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          // color: Colors.grey,
-                                          height: emptyListHeight(_animationController.value, emptyList.length),
-                                          child: taskListLayout(state, true, listBloc),
-                                        )
-                                      ],
-                                    );
-                                  }
-                                ),
-                              ],
+                              },
                             ),
                           ),
-                        ),
-                      );
-                    }
-                  },
+                        ];
+                      },
+                    )
+                  ],
                 ),
+                body: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Category title
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: CategoryTitle(
+                        properties: getOptionProperties(widget.value),
+                      ),
+                    ),
 
-                //Add task section
-                SizedBox(
-                  height: maxWidth <= 992 && !_focusNode.hasFocus ? 0 : null,
-                  child: AddTaskLayout(
-                    scrollController: _scrollController,
-                    iconColor: getOptionProperties(widget.value)['iconColor'],
-                    category: getOptionProperties(widget.value)['title'],
-                    focusNode: _focusNode,
-                    controller: _controller,
-                    value: widget.value,
-                    listBloc: listBloc,
-                  ),
+                    // List of Tasks section
+                    BlocBuilder<TaskListBloc, TaskListState>(
+                      builder: (context, state) {
+                        final emptyList =
+                            categoryList(widget.value, state.tasks, isEmptyList: true);
+
+                        if (categoryList(widget.value, state.tasks).isEmpty &&
+                            emptyList.isEmpty) {
+                          return EmptyMessageWidget(
+                              imageName:
+                                  getOptionProperties(widget.value)['emptyMessageImage'],
+                              message: getOptionProperties(widget.value)['emptyMessage']);
+                        } else {
+                          return Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              child: SingleChildScrollView(
+                                controller: _scrollController,
+                                child: Column(
+                                  children: [
+                                    taskListLayout(state, false, listBloc, readSelectionBloc),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+
+                                    // Task completed section
+                                    if (emptyList.isNotEmpty)AnimatedBuilder(
+                                      animation: animation,
+                                      builder: (context, child) {
+                                        return Column(
+                                          children: [
+                                            Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: InkWell(
+                                                onTap: () {
+                                                  if(!isOpened){
+                                                    _animationController.forward();
+                                                  } else{
+                                                    _animationController.reverse();
+                                                  }
+                                                  setState(() => isOpened = !isOpened);
+                                                },
+                                                child: Container(
+                                                  width: 140,
+                                                  padding: const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 5,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.black.withOpacity(0.4),
+                                                      borderRadius:
+                                                      BorderRadius.circular(10)),
+                                                  child: Row(
+                                                    children: [
+                                                      Text(
+                                                        'Completed  (${emptyList.length})',
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                      const Spacer(),
+                                                      Transform(
+                                                        alignment: Alignment.center,
+                                                        transform: Matrix4.rotationZ((_animationController.value * 90) * (pi.pi / 180)),
+                                                        child: const Icon(
+                                                          Icons.keyboard_arrow_right,
+                                                          color: Colors.white,
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              // color: Colors.grey,
+                                              height: emptyListHeight(_animationController.value, emptyList.length),
+                                              child: taskListLayout(state, true, listBloc, readSelectionBloc),
+                                            )
+                                          ],
+                                        );
+                                      }
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+
+                    //Add task section
+                    SizedBox(
+                      height: maxWidth <= 992 && !_focusNode.hasFocus ? 0 : null,
+                      child: AddTaskLayout(
+                        scrollController: _scrollController,
+                        iconColor: getOptionProperties(widget.value)['iconColor'],
+                        category: getOptionProperties(widget.value)['title'],
+                        focusNode: _focusNode,
+                        controller: _controller,
+                        value: widget.value,
+                        listBloc: listBloc,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            drawer: maxWidth <= 992
-                ? Drawer(
-                    child: DrawerLayout(
-                      options: options,
-                      drawerOption: widget.value,
-                    ),
-                  )
-                : null,
-            floatingActionButton: maxWidth <= 992 && !_focusNode.hasFocus
-                ? FloatingActionButton(
-                    onPressed: () => _focusNode.requestFocus(),
-                    backgroundColor: getOptionProperties(widget.value)['iconColor'],
-                    tooltip: 'Add task',
-                    child: const Icon(
-                      Icons.add,
-                      color: Colors.white,
-                    ),
-                  )
-                : null,
-          ),
-        ));
+                drawer: maxWidth <= 992
+                    ? Drawer(
+                        child: DrawerLayout(
+                          options: options,
+                          drawerOption: widget.value,
+                        ),
+                      )
+                    : null,
+                floatingActionButton: maxWidth <= 992 && !_focusNode.hasFocus
+                    ? FloatingActionButton(
+                        onPressed: () => _focusNode.requestFocus(),
+                        backgroundColor: getOptionProperties(widget.value)['iconColor'],
+                        tooltip: 'Add task',
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                        ),
+                      )
+                    : null,
+              ),
+            ));
+      }
+    );
   }
 
-  taskListLayout(TaskListState state, bool isEmptyList, TaskListBloc listBloc) {
+  taskListLayout(TaskListState state, bool isEmptyList, TaskListBloc listBloc, SelectionBloc readSelectionBloc) {
     return ListView.builder(
       primary: false,
       shrinkWrap: true,
@@ -273,6 +282,9 @@ class _HomeLayoutState extends State<HomeLayout> with SingleTickerProviderStateM
               dismissibleKey: ValueKey(task['key']),
               item: task,
               index: index,
+              onLongPressed: (){
+                readSelectionBloc.add(Select(id: task['key']));
+              },
               checkedOnPressed: () {
                 listBloc.add(UpdateTask(
                     task: TaskModel(

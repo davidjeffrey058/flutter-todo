@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +9,7 @@ import 'package:todo/bloc/task_list_bloc.dart';
 import 'package:todo/screens/components/boxes.dart';
 import 'package:todo/screens/home.dart';
 import 'package:todo/theme.dart';
+import 'bloc/SelectionBloc/selection_bloc.dart';
 import 'models/task_model.dart';
 
 Future<void> main() async{
@@ -25,7 +27,8 @@ Future<void> main() async{
     providers: [
       BlocProvider<TaskListBloc>(create: (context) => TaskListBloc()),
       BlocProvider<DrawerCubit>(create: (context) => DrawerCubit()),
-      BlocProvider<ThemeBloc>(create: (context) => ThemeBloc(),)
+      BlocProvider<ThemeBloc>(create: (context) => ThemeBloc(),),
+      BlocProvider<SelectionBloc>(create: (context) => SelectionBloc()),
     ],
     child: BlocBuilder<ThemeBloc, ThemeMode>(
       builder: (context, state) {
