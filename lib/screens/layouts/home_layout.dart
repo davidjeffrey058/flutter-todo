@@ -69,7 +69,7 @@ class _HomeLayoutState extends State<HomeLayout> with SingleTickerProviderStateM
     final navigator = Navigator.of(context);
     final readThemeBloc = context.read<ThemeBloc>();
     TaskListBloc listBloc = BlocProvider.of<TaskListBloc>(context);
-    final theme = Theme.of(context);
+    // final theme = Theme.of(context);
     final readSelectionBloc = context.read<SelectionBloc>();
 
     return BlocBuilder<SelectionBloc, SelectionState>(
