@@ -12,43 +12,69 @@ import '../components/empty_message_widget.dart';
 import '../components/methods.dart';
 import '../components/task_container.dart';
 import '../test_page.dart';
+import 'dart:math' as pi;
 
-class HomeLayout extends StatelessWidget {
-  final void Function()? gestureDetectorOnTap;
+class HomeLayout extends StatefulWidget {
   final DrawerOptions value;
-  final ScrollController scrollController;
-  final TaskListBloc listBloc;
-  final TextEditingController editingController;
-  final TextEditingController controller;
-  final FocusNode focusNode;
 
   const HomeLayout({
     super.key,
-    this.gestureDetectorOnTap,
     required this.value,
-    required this.scrollController,
-    required this.listBloc,
-    required this.editingController,
-    required this.controller,
-    required this.focusNode,
   });
+
+  @override
+  State<HomeLayout> createState() => _HomeLayoutState();
+}
+late AnimationController _animationController;
+late Animation animation;
+late TextEditingController _controller;
+late FocusNode _focusNode;
+late TextEditingController _editingController;
+late ScrollController _scrollController;
+late bool isOpened;
+
+class _HomeLayoutState extends State<HomeLayout> with SingleTickerProviderStateMixin{
+
+  @override
+  void initState() {
+    super.initState();
+    isOpened = false;
+    _controller = TextEditingController();
+    _controller.addListener(() => setState(() {}));
+    _focusNode = FocusNode();
+    _focusNode.addListener(() => setState(() {}));
+    _editingController = TextEditingController();
+    _scrollController = ScrollController();
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
+    animation = Tween(begin: 0, end: 1).animate(_animationController);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+    _focusNode.dispose();
+    _editingController.dispose();
+    _scrollController.dispose();
+    _animationController.dispose();
+    TaskListBloc().close();
+  }
 
   @override
   Widget build(BuildContext context) {
 
     final maxWidth = MediaQuery.of(context).size.width;
-    // final maxHeight = MediaQuery.of(context).size.height;
     final navigator = Navigator.of(context);
     final readThemeBloc = context.read<ThemeBloc>();
-
+    TaskListBloc listBloc = BlocProvider.of<TaskListBloc>(context);
 
     return GestureDetector(
-        onTap: gestureDetectorOnTap,
+        onTap: () => _focusNode.unfocus(),
         child: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
                 image: AssetImage(
-                    'images/${getOptionProperties(value)['backgroundImage']}'),
+                    'images/${getOptionProperties(widget.value)['backgroundImage']}'),
                 fit: BoxFit.cover),
           ),
           child: Scaffold(
@@ -93,7 +119,7 @@ class HomeLayout extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: CategoryTitle(
-                    properties: getOptionProperties(value),
+                    properties: getOptionProperties(widget.value),
                   ),
                 ),
 
@@ -101,63 +127,86 @@ class HomeLayout extends StatelessWidget {
                 BlocBuilder<TaskListBloc, TaskListState>(
                   builder: (context, state) {
                     final emptyList =
-                        categoryList(value, state.tasks, isEmptyList: true);
+                        categoryList(widget.value, state.tasks, isEmptyList: true);
 
-                    if (categoryList(value, state.tasks).isEmpty &&
+                    if (categoryList(widget.value, state.tasks).isEmpty &&
                         emptyList.isEmpty) {
                       return EmptyMessageWidget(
                           imageName:
-                              getOptionProperties(value)['emptyMessageImage'],
-                          message: getOptionProperties(value)['emptyMessage']);
+                              getOptionProperties(widget.value)['emptyMessageImage'],
+                          message: getOptionProperties(widget.value)['emptyMessage']);
                     } else {
                       return Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: SingleChildScrollView(
-                            controller: scrollController,
+                            controller: _scrollController,
                             child: Column(
                               children: [
-                                taskListLayout(state, false),
+                                taskListLayout(state, false, listBloc),
                                 const SizedBox(
                                   height: 10,
                                 ),
 
                                 // Task completed section
-                                if (emptyList.isNotEmpty)
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Container(
-                                      width: 140,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 5,
-                                      ),
-                                      decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.4),
-                                          borderRadius:
-                                              BorderRadius.circular(10)),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            'Completed  (${emptyList.length})',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
+                                if (emptyList.isNotEmpty)AnimatedBuilder(
+                                  animation: animation,
+                                  builder: (context, child) {
+                                    return Column(
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: InkWell(
+                                            onTap: () {
+                                              if(!isOpened){
+                                                _animationController.forward();
+                                              } else{
+                                                _animationController.reverse();
+                                              }
+                                              setState(() => isOpened = !isOpened);
+                                            },
+                                            child: Container(
+                                              width: 140,
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                                vertical: 5,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                  color: Colors.black.withOpacity(0.4),
+                                                  borderRadius:
+                                                  BorderRadius.circular(10)),
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                    'Completed  (${emptyList.length})',
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  const Spacer(),
+                                                  Transform(
+                                                    alignment: Alignment.center,
+                                                    transform: Matrix4.rotationZ((_animationController.value * 90) * (pi.pi / 180)),
+                                                    child: const Icon(
+                                                      Icons.keyboard_arrow_right,
+                                                      color: Colors.white,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                          const Spacer(),
-                                          const Icon(
-                                            Icons.keyboard_arrow_down_rounded,
-                                            color: Colors.white,
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                if (emptyList.isNotEmpty)
-                                  SizedBox(
-                                    child: taskListLayout(state, true),
-                                  )
+                                        ),
+                                        SizedBox(
+                                          // color: Colors.grey,
+                                          height: emptyListHeight(_animationController.value, emptyList.length),
+                                          child: taskListLayout(state, true, listBloc),
+                                        )
+                                      ],
+                                    );
+                                  }
+                                ),
                               ],
                             ),
                           ),
@@ -169,14 +218,14 @@ class HomeLayout extends StatelessWidget {
 
                 //Add task section
                 SizedBox(
-                  height: maxWidth <= 992 && !focusNode.hasFocus ? 0 : null,
+                  height: maxWidth <= 992 && !_focusNode.hasFocus ? 0 : null,
                   child: AddTaskLayout(
-                    scrollController: scrollController,
-                    iconColor: getOptionProperties(value)['iconColor'],
-                    category: getOptionProperties(value)['title'],
-                    focusNode: focusNode,
-                    controller: controller,
-                    value: value,
+                    scrollController: _scrollController,
+                    iconColor: getOptionProperties(widget.value)['iconColor'],
+                    category: getOptionProperties(widget.value)['title'],
+                    focusNode: _focusNode,
+                    controller: _controller,
+                    value: widget.value,
                     listBloc: listBloc,
                   ),
                 ),
@@ -186,14 +235,14 @@ class HomeLayout extends StatelessWidget {
                 ? Drawer(
                     child: DrawerLayout(
                       options: options,
-                      drawerOption: value,
+                      drawerOption: widget.value,
                     ),
                   )
                 : null,
-            floatingActionButton: maxWidth <= 992 && !focusNode.hasFocus
+            floatingActionButton: maxWidth <= 992 && !_focusNode.hasFocus
                 ? FloatingActionButton(
-                    onPressed: () => focusNode.requestFocus(),
-                    backgroundColor: getOptionProperties(value)['iconColor'],
+                    onPressed: () => _focusNode.requestFocus(),
+                    backgroundColor: getOptionProperties(widget.value)['iconColor'],
                     tooltip: 'Add task',
                     child: const Icon(
                       Icons.add,
@@ -205,17 +254,15 @@ class HomeLayout extends StatelessWidget {
         ));
   }
 
-
-
-  taskListLayout(TaskListState state, bool isEmptyList) {
+  taskListLayout(TaskListState state, bool isEmptyList, TaskListBloc listBloc) {
     return ListView.builder(
       primary: false,
       shrinkWrap: true,
       itemCount:
-          categoryList(value, state.tasks, isEmptyList: isEmptyList).length,
+          categoryList(widget.value, state.tasks, isEmptyList: isEmptyList).length,
       itemBuilder: (context, index) {
         Map task =
-            categoryList(value, state.tasks, isEmptyList: isEmptyList)[index];
+            categoryList(widget.value, state.tasks, isEmptyList: isEmptyList)[index];
         return Column(
           children: [
             if (index == 0)
@@ -255,7 +302,7 @@ class HomeLayout extends StatelessWidget {
               },
               confirmDismiss: (DismissDirection direction) async {
                 if (direction == DismissDirection.startToEnd) {
-                  editingController.text = task['task'];
+                  _editingController.text = task['task'];
                   showDialog(
                       context: context,
                       builder: (context) {
@@ -267,7 +314,7 @@ class HomeLayout extends StatelessWidget {
                               TextFormField(
                                 minLines: 2,
                                 maxLines: 3,
-                                controller: editingController,
+                                controller: _editingController,
                                 autofocus: true,
                               )
                             ],
@@ -277,7 +324,7 @@ class HomeLayout extends StatelessWidget {
                                 onPressed: () {
                                   listBloc.add(UpdateTask(
                                     task: TaskModel(
-                                      task: editingController.text,
+                                      task: _editingController.text,
                                       isChecked: task['isChecked'],
                                       isImportant: task['isImportant'],
                                       category: task['category'],
@@ -309,5 +356,9 @@ class HomeLayout extends StatelessWidget {
         );
       },
     );
+  }
+
+  double emptyListHeight(double animationValue, int listLength){
+    return ((_animationController.value * 90) * listLength);
   }
 }
